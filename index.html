@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs (v9 Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +34,34 @@
     </script>
 </head>
 <body class="bg-gray-100">
-    <main class="flex min-h-screen">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-200">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-primary">AWC System</h1>
+                <p class="text-gray-500">الرجاء تسجيل الدخول للمتابعة</p>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-3 mt-1 text-left rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" dir="ltr">
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-3 mt-1 text-left rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" dir="ltr">
+                    </div>
+                </div>
+                <p id="login-error" class="text-red-500 text-sm text-center mt-4 h-5"></p>
+                <button type="submit" class="w-full mt-4 bg-primary hover:bg-secondary text-white font-bold py-3 px-6 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                    تسجيل الدخول
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <main id="main-app" class="flex min-h-screen hidden">
         <!-- Sidebar -->
         <nav class="bg-primary text-white w-64 p-4 pt-8 space-y-6 hidden md:block">
             <div class="text-center mb-8">
@@ -89,17 +117,27 @@
                         <span>التقارير</span>
                     </a>
                 </li>
+                <li>
+                    <a href="#" onclick="showView('users')" id="nav-users" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-users-cog ml-3 w-6 text-center"></i>
+                        <span>إدارة المستخدمين</span>
+                    </a>
+                </li>
             </ul>
         </nav>
 
         <!-- Main Content -->
         <div class="flex-1 p-4 md:p-8">
             <!-- Header -->
+            
             <header class="flex justify-between items-center mb-8">
                 <h2 id="page-title" class="text-2xl font-bold text-gray-800">لوحة التحكم</h2>
                 <div class="flex items-center gap-4">
                     <button class="text-gray-500 hover:text-primary">
                         <i class="fas fa-bell text-xl"></i>
+                    </button>
+                    <button onclick="handleLogout()" class="text-gray-500 hover:text-red-500" title="تسجيل الخروج">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
                     </button>
                     <div class="w-10 h-10 bg-gray-300 rounded-full"></div>
                     <button class="md:hidden text-gray-600 text-2xl" onclick="toggleMobileMenu()">
@@ -124,6 +162,7 @@
                     <li><a href="#" onclick="showView('instructors'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">إدارة المدربين</a></li>
                     <li><a href="#" onclick="showView('courses'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">إدارة الكورسات</a></li>
                     <li><a href="#" onclick="showView('reports'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">التقارير</a></li>
+                    <li><a href="#" onclick="showView('users'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">إدارة المستخدمين</a></li>
                 </ul>
             </nav>
 
@@ -686,13 +725,12 @@
         <div class="absolute inset-0 bg-black opacity-40"></div>
         <div class="bg-white rounded-lg shadow-2xl p-6 w-96 relative z-10 transform scale-95 transition-transform duration-200" id="notification-content">
             <div class="text-center">
-                <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
-                    <i class="fas fa-check"></i>
+                <div id="notification-icon-container" class="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i id="notification-icon" class="fas"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">تمت العملية بنجاح!</h3>
-                <!-- Changed to allow HTML content -->
-                <div class="text-gray-600 mb-6" id="notification-message">تم حفظ البيانات في النظام.</div>
-                <button onclick="closeNotification()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">حسناً</button>
+                <h3 class="text-xl font-bold mb-2" id="notification-title"></h3>
+                <div class="text-gray-600 mb-6" id="notification-message"></div>
+                <button onclick="closeNotification()" id="notification-button" class="w-full text-white py-2 rounded-lg transition">حسناً</button>
             </div>
         </div>
     </div>
@@ -714,6 +752,7 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
         // =================================================================
         // Local Data Cache (synced with Firebase)
@@ -729,13 +768,28 @@
         // INITIALIZATION & REAL-TIME LISTENERS
         // =================================================================
         document.addEventListener('DOMContentLoaded', () => {
-            showView('dashboard');
+            // Listen for auth state changes
+            auth.onAuthStateChanged(user => {
+                const loginScreen = document.getElementById('login-screen');
+                const mainApp = document.getElementById('main-app');
 
-            // Real-time listeners to keep local cache and UI in sync with Firestore
-            db.collection('instructors').orderBy('name').onSnapshot(handleSnapshot(instructors, updateInstructorsUI));
-            db.collection('courses').orderBy('name').onSnapshot(handleSnapshot(courses, updateCoursesUI));
-            db.collection('lectures').orderBy('date', 'desc').onSnapshot(handleSnapshot(lectures, updateLecturesUI));
-            db.collection('trainees').orderBy('date', 'desc').onSnapshot(handleSnapshot(trainees, updateTraineesUI));
+                if (user) {
+                    // User is signed in.
+                    loginScreen.classList.add('hidden');
+                    mainApp.classList.remove('hidden');
+                    
+                    showView('dashboard');
+                    // Real-time listeners to keep local cache and UI in sync with Firestore
+                    db.collection('instructors').orderBy('name').onSnapshot(handleSnapshot(instructors, updateInstructorsUI));
+                    db.collection('courses').orderBy('name').onSnapshot(handleSnapshot(courses, updateCoursesUI));
+                    db.collection('lectures').orderBy('date', 'desc').onSnapshot(handleSnapshot(lectures, updateLecturesUI));
+                    db.collection('trainees').orderBy('date', 'desc').onSnapshot(handleSnapshot(trainees, updateTraineesUI));
+                } else {
+                    // User is signed out.
+                    loginScreen.classList.remove('hidden');
+                    mainApp.classList.add('hidden');
+                }
+            });
         });
 
         // Navigation Logic
@@ -780,7 +834,8 @@
                 'lectures': 'إدارة المحاضرات',
                 'instructors': 'إدارة المدربين',
                 'courses': 'إدارة الكورسات',
-                'reports': 'التقارير والإحصائيات'
+                'reports': 'التقارير والإحصائيات',
+                'users': 'إدارة المستخدمين'
             };
             document.getElementById('page-title').textContent = titles[viewId] || 'AWC System';
         }
@@ -825,6 +880,66 @@
             const prefix = 'AWC';
             const randomNumber = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
             return `${prefix}${randomNumber}`;
+        }
+
+        // Auth Handlers
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorElement = document.getElementById('login-error');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+
+            errorElement.textContent = '';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                // onAuthStateChanged will handle the UI switch
+            } catch (error) {
+                errorElement.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+                console.error("Login Error:", error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        }
+
+        async function handleLogout() {
+            await auth.signOut();
+            // onAuthStateChanged will handle the UI switch
+        }
+
+        async function handleAddNewUser(e) {
+            e.preventDefault();
+            const email = document.getElementById('new-user-email').value;
+            const password = document.getElementById('new-user-password').value;
+            const form = document.getElementById('addUserForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
+
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                showNotification(`تم إنشاء المستخدم <b>${email}</b> بنجاح. يمكنه الآن تسجيل الدخول.`, 'success');
+                form.reset();
+            } catch (error) {
+                let errorMessage = 'حدث خطأ غير متوقع.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'كلمة المرور ضعيفة جداً. يجب أن تتكون من 6 أحرف على الأقل.';
+                }
+                console.error("Error creating user:", error);
+                showNotification(errorMessage, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
         }
 
         // Handlers
@@ -895,7 +1010,7 @@
                 </div>
             `;
             
-            showNotification(successMessage);
+            showNotification(successMessage, 'success');
         }
 
         function handleAttendanceSearch() {
@@ -1009,7 +1124,7 @@
             await db.collection('lectures').add(newLectureData);
             
             e.target.reset();
-            showNotification('تم جدولة المحاضرة وإضافتها للنظام بنجاح.');
+            showNotification('تم جدولة المحاضرة وإضافتها للنظام بنجاح.', 'success');
             switchLectureTab(status === 'upcoming' ? 'upcoming' : 'recorded');
         }
 
@@ -1024,14 +1139,14 @@
             try {
                 if (editingInstructorId) {
                     await db.collection('instructors').doc(editingInstructorId).update(data);
-                    showNotification(`تم تحديث بيانات المدرب <b>${name}</b> بنجاح.`);
+                    showNotification(`تم تحديث بيانات المدرب <b>${name}</b> بنجاح.`, 'success');
                 } else {
                     await db.collection('instructors').add(data);
-                    showNotification(`تم إضافة المدرب <b>${name}</b> بنجاح.`);
+                    showNotification(`تم إضافة المدرب <b>${name}</b> بنجاح.`, 'success');
                 }
             } catch (error) {
                 console.error("Error saving instructor: ", error);
-                showNotification("حدث خطأ أثناء حفظ البيانات.");
+                showNotification("حدث خطأ أثناء حفظ البيانات.", 'error');
             }
 
             setInstructorFormState('add'); // Reset form to 'add' state
@@ -1098,15 +1213,15 @@
 
         async function deleteInstructor(instructorId) {
             try {
-                await db.collection('instructors').doc(instructorId).delete();
-                showNotification('تم حذف المدرب بنجاح.');
+                await db.collection('instructors').doc(instructorId).delete(); 
+                showNotification('تم حذف المدرب بنجاح.', 'success');
                 // If the deleted instructor was being edited, reset the form
                 if (editingInstructorId === instructorId) {
                     setInstructorFormState('add');
                 }
             } catch (error) {
                 console.error("Error deleting instructor: ", error);
-                showNotification("حدث خطأ أثناء حذف المدرب.");
+                showNotification("حدث خطأ أثناء حذف المدرب.", 'error');
             }
         }
 
@@ -1118,7 +1233,7 @@
             const instructor = instructors.find(i => i.id === instructorId);
 
             if (!instructor) {
-                showNotification('الرجاء اختيار مدرب صحيح.');
+                showNotification('الرجاء اختيار مدرب صحيح.', 'error');
                 return;
             }
 
@@ -1132,14 +1247,14 @@
             try {
                 if (editingCourseId) {
                     await db.collection('courses').doc(editingCourseId).update(data);
-                    showNotification(`تم تحديث بيانات كورس <b>${name}</b> بنجاح.`);
+                    showNotification(`تم تحديث بيانات كورس <b>${name}</b> بنجاح.`, 'success');
                 } else {
                     await db.collection('courses').add(data);
-                    showNotification(`تم إضافة كورس <b>${name}</b> بنجاح.`);
+                    showNotification(`تم إضافة كورس <b>${name}</b> بنجاح.`, 'success');
                 }
             } catch (error) {
                 console.error("Error saving course: ", error);
-                showNotification("حدث خطأ أثناء حفظ الكورس.");
+                showNotification("حدث خطأ أثناء حفظ الكورس.", 'error');
             }
 
             setCourseFormState('add'); // Reset form to 'add' state
@@ -1206,15 +1321,15 @@
 
         async function deleteCourse(courseId) {
             try {
-                await db.collection('courses').doc(courseId).delete();
-                showNotification('تم حذف الكورس بنجاح.');
+                await db.collection('courses').doc(courseId).delete(); 
+                showNotification('تم حذف الكورس بنجاح.', 'success');
                 // If the deleted course was being edited, reset the form
                 if (editingCourseId === courseId) {
                     setCourseFormState('add');
                 }
             } catch (error) {
                 console.error("Error deleting course: ", error);
-                showNotification("حدث خطأ أثناء حذف الكورس.");
+                showNotification("حدث خطأ أثناء حذف الكورس.", 'error');
             }
         }
 
@@ -1224,7 +1339,7 @@
             const amount = parseFloat(amountInput.value);
 
             if (!amount || amount <= 0) {
-                showNotification('الرجاء إدخال مبلغ صحيح للدفع.');
+                showNotification('الرجاء إدخال مبلغ صحيح للدفع.', 'error');
                 return;
             }
 
@@ -1232,7 +1347,7 @@
             if (trainee) {
                 const newPaidAmount = (trainee.payment.paid || 0) + amount;
                 if (newPaidAmount > trainee.payment.total) {
-                    showNotification('المبلغ المدفوع يتجاوز المبلغ الإجمالي المتبقي.');
+                    showNotification('المبلغ المدفوع يتجاوز المبلغ الإجمالي المتبقي.', 'error');
                     return;
                 }
 
@@ -1246,7 +1361,7 @@
                     'payment.status': newStatus
                 });
 
-                showNotification(`تم تسجيل دفعة بقيمة <b>${amount} EGP</b> للمتدرب <b>${trainee.name}</b>.`);
+                showNotification(`تم تسجيل دفعة بقيمة <b>${amount} EGP</b> للمتدرب <b>${trainee.name}</b>.`, 'success');
             }
         }
 
@@ -1254,7 +1369,7 @@
             const trainee = trainees.find(t => t.id === traineeId);
             if (trainee) {
                 await db.collection('trainees').doc(traineeId).update({ status: 'مفعل' });
-                showNotification(`تم تفعيل حضور المتدرب <b>${trainee.name}</b> بنجاح.`);
+                showNotification(`تم تفعيل حضور المتدرب <b>${trainee.name}</b> بنجاح.`, 'success');
             }
         }
 
@@ -1460,11 +1575,31 @@
         }
 
         // Custom Notification System
-        function showNotification(msg) {
-            // Using innerHTML to support HTML formatting in messages
+        function showNotification(msg, type = 'success') {
             document.getElementById('notification-message').innerHTML = msg;
             const modal = document.getElementById('notification-modal');
             const content = document.getElementById('notification-content');
+            const iconContainer = document.getElementById('notification-icon-container');
+            const icon = document.getElementById('notification-icon');
+            const title = document.getElementById('notification-title');
+            const button = document.getElementById('notification-button');
+
+            // Reset classes
+            iconContainer.className = 'w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4';
+            icon.className = 'fas';
+            button.className = 'w-full text-white py-2 rounded-lg transition';
+
+            if (type === 'error') {
+                title.textContent = 'حدث خطأ!';
+                iconContainer.classList.add('bg-red-100', 'text-red-500');
+                icon.classList.add('fa-times-circle');
+                button.classList.add('bg-red-600', 'hover:bg-red-700');
+            } else { // success
+                title.textContent = 'تمت العملية بنجاح!';
+                iconContainer.classList.add('bg-green-100', 'text-green-500');
+                icon.classList.add('fa-check');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }
             
             modal.classList.remove('hidden');
             setTimeout(() => {
