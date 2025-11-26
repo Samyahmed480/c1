@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AWC System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs (v9 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -695,7 +698,26 @@
     </div>
 
     <script>
-        // Data Store (Mock Database)
+        // =================================================================
+        // 1. FIREBASE SETUP - Your Project's Configuration
+        // =================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAj6ykD72lDT7_5IeXRDR2paHOAqfQTdxo",
+            authDomain: "awc-system.firebaseapp.com",
+            projectId: "awc-system",
+            storageBucket: "awc-system.appspot.com",
+            messagingSenderId: "739243681978",
+            appId: "1:739243681978:web:a1c77f354ae6424f70ba83",
+            measurementId: "G-1PHE48ZPDK"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // =================================================================
+        // Local Data Cache (synced with Firebase)
+        // =================================================================
         let trainees = [];
         let lectures = [];
         let instructors = [];
@@ -703,15 +725,17 @@
         let editingInstructorId = null;
         let editingCourseId = null;
 
-        // Initialization
+        // =================================================================
+        // INITIALIZATION & REAL-TIME LISTENERS
+        // =================================================================
         document.addEventListener('DOMContentLoaded', () => {
             showView('dashboard');
-            updateStats();
-            populateInstructorsDropdowns();
-            populateCoursesDropdowns();
-            updateLectureLists();
-            updateInstructorsTable();
-            updateCoursesTable();
+
+            // Real-time listeners to keep local cache and UI in sync with Firestore
+            db.collection('instructors').orderBy('name').onSnapshot(handleSnapshot(instructors, updateInstructorsUI));
+            db.collection('courses').orderBy('name').onSnapshot(handleSnapshot(courses, updateCoursesUI));
+            db.collection('lectures').orderBy('date', 'desc').onSnapshot(handleSnapshot(lectures, updateLecturesUI));
+            db.collection('trainees').orderBy('date', 'desc').onSnapshot(handleSnapshot(trainees, updateTraineesUI));
         });
 
         // Navigation Logic
@@ -775,6 +799,28 @@
             }
         }
 
+        // Generic snapshot handler to reduce boilerplate
+        function handleSnapshot(localCache, uiUpdateFn) {
+            return (snapshot) => {
+                const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                localCache.length = 0; // Clear the local array
+                localCache.push(...data); // Repopulate with fresh data
+                if (uiUpdateFn) uiUpdateFn(); // Update the UI
+            };
+        }
+
+        // UI Update Orchestrators
+        function updateInstructorsUI() {
+            updateInstructorsTable();
+            populateInstructorsDropdowns();
+        }
+        function updateCoursesUI() {
+            updateCoursesTable();
+            populateCoursesDropdowns();
+        }
+        function updateLecturesUI() { updateLectureLists(); updateStats(); }
+        function updateTraineesUI() { updateTraineesTable(); updateStats(); handleAttendanceSearch(); }
+
         function generateTraineeCode() {
             const prefix = 'AWC';
             const randomNumber = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
@@ -806,8 +852,7 @@
 
             const traineeCode = generateTraineeCode();
 
-            const newTrainee = {
-                id: trainees.length + 1,
+            const newTraineeData = {
                 code: traineeCode,
                 name: name,
                 phone: phone,
@@ -819,15 +864,13 @@
                     paid: 0,
                     status: 'غير مدفوع'
                 },
-                date: new Date().toLocaleDateString('ar-EG')
+                date: new Date().toISOString()
             };
 
-            trainees.push(newTrainee);
+            await db.collection('trainees').add(newTraineeData);
             
             // Reset and Notify
             e.target.reset();
-            updateStats();
-            updateTraineesTable();
             
             // 3. Reset Button
             btn.disabled = false;
@@ -896,12 +939,12 @@
             const isActivated = trainee.status === 'مفعل';
             const activationButton = isActivated 
                 ? `<button disabled class="w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"><i class="fas fa-check-circle"></i> تم التفعيل</button>`
-                : `<button onclick="activateTrainee(${trainee.id})" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"><i class="fas fa-user-check"></i> تفعيل الحضور</button>`;
+                : `<button onclick="activateTrainee('${trainee.id}')" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"><i class="fas fa-user-check"></i> تفعيل الحضور</button>`;
 
             const isFullyPaid = trainee.payment.status === 'مدفوع بالكامل';
             const paymentSection = isFullyPaid
                 ? `<div class="text-center p-2 bg-green-50 border border-green-200 rounded-md text-sm text-green-700 font-semibold"><i class="fas fa-check-circle"></i> مكتمل السداد</div>`
-                : `<form onsubmit="handlePayment(event, ${trainee.id})" class="flex items-center gap-2">
+                : `<form onsubmit="handlePayment(event, '${trainee.id}')" class="flex items-center gap-2">
                         <input type="number" id="payment-amount-${trainee.id}" placeholder="أدخل المبلغ" required min="1" class="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
                         <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1.5 px-3 rounded-md text-sm transition flex items-center justify-center"><i class="fas fa-dollar-sign"></i></button>
                    </form>`;
@@ -938,7 +981,7 @@
             `;
         }
 
-        function handleAddLecture(e) {
+        async function handleAddLecture(e) {
             e.preventDefault();
             
             const title = document.getElementById('lec-title').value;
@@ -952,53 +995,45 @@
             const course = courses.find(c => c.id == courseId);
             const instructor = instructors.find(i => i.id == instructorId);
 
-            lectures.push({ 
-                id: lectures.length + 1,
+            const newLectureData = {
                 title, 
                 courseName: course ? course.name : 'N/A',
+                courseId: course ? course.id : null,
                 instructorName: instructor ? instructor.name : 'N/A',
+                instructorId: instructor ? instructor.id : null,
                 date,
                 time,
                 link,
                 status
-            });
+            };
+            await db.collection('lectures').add(newLectureData);
             
             e.target.reset();
-            updateStats();
-            updateLectureLists();
             showNotification('تم جدولة المحاضرة وإضافتها للنظام بنجاح.');
             switchLectureTab(status === 'upcoming' ? 'upcoming' : 'recorded');
         }
 
-        function handleAddInstructor(e) {
+        async function handleAddInstructor(e) {
             e.preventDefault();
             const name = document.getElementById('inst-name').value;
             const spec = document.getElementById('inst-spec').value;
             const email = document.getElementById('inst-email').value;
 
-            if (editingInstructorId) {
-                // Update existing instructor
-                const instructor = instructors.find(i => i.id === editingInstructorId);
-                if (instructor) {
-                    instructor.name = name;
-                    instructor.spec = spec;
-                    instructor.email = email;
+            const data = { name, spec, email };
+
+            try {
+                if (editingInstructorId) {
+                    await db.collection('instructors').doc(editingInstructorId).update(data);
                     showNotification(`تم تحديث بيانات المدرب <b>${name}</b> بنجاح.`);
+                } else {
+                    await db.collection('instructors').add(data);
+                    showNotification(`تم إضافة المدرب <b>${name}</b> بنجاح.`);
                 }
-            } else {
-                // Add new instructor
-                const newInstructor = {
-                    id: instructors.length > 0 ? Math.max(...instructors.map(i => i.id)) + 1 : 1,
-                    name,
-                    spec,
-                    email
-                };
-                instructors.push(newInstructor);
-                showNotification(`تم إضافة المدرب <b>${name}</b> بنجاح.`);
+            } catch (error) {
+                console.error("Error saving instructor: ", error);
+                showNotification("حدث خطأ أثناء حفظ البيانات.");
             }
 
-            updateInstructorsTable();
-            populateInstructorsDropdowns();
             setInstructorFormState('add'); // Reset form to 'add' state
         }
 
@@ -1061,22 +1096,25 @@
             );
         }
 
-        function deleteInstructor(instructorId) {
-            instructors = instructors.filter(i => i.id !== instructorId);
-            updateInstructorsTable();
-            populateInstructorsDropdowns();
-            showNotification('تم حذف المدرب بنجاح.');
-            // If the deleted instructor was being edited, reset the form
-            if (editingInstructorId === instructorId) {
-                setInstructorFormState('add');
+        async function deleteInstructor(instructorId) {
+            try {
+                await db.collection('instructors').doc(instructorId).delete();
+                showNotification('تم حذف المدرب بنجاح.');
+                // If the deleted instructor was being edited, reset the form
+                if (editingInstructorId === instructorId) {
+                    setInstructorFormState('add');
+                }
+            } catch (error) {
+                console.error("Error deleting instructor: ", error);
+                showNotification("حدث خطأ أثناء حذف المدرب.");
             }
         }
 
-        function handleAddCourse(e) {
+        async function handleAddCourse(e) {
             e.preventDefault();
             const name = document.getElementById('course-name').value;
             const price = parseFloat(document.getElementById('course-price').value);
-            const instructorId = parseInt(document.getElementById('course-instructor').value);
+            const instructorId = document.getElementById('course-instructor').value;
             const instructor = instructors.find(i => i.id === instructorId);
 
             if (!instructor) {
@@ -1084,31 +1122,26 @@
                 return;
             }
 
-            if (editingCourseId) {
-                // Update existing course
-                const course = courses.find(c => c.id === editingCourseId);
-                if (course) {
-                    course.name = name;
-                    course.price = price;
-                    course.instructorName = instructor.name;
-                    course.instructorId = instructor.id;
+            const data = {
+                name,
+                price,
+                instructorName: instructor.name,
+                instructorId: instructor.id
+            };
+
+            try {
+                if (editingCourseId) {
+                    await db.collection('courses').doc(editingCourseId).update(data);
                     showNotification(`تم تحديث بيانات كورس <b>${name}</b> بنجاح.`);
+                } else {
+                    await db.collection('courses').add(data);
+                    showNotification(`تم إضافة كورس <b>${name}</b> بنجاح.`);
                 }
-            } else {
-                // Add new course
-                const newCourse = {
-                    id: courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1,
-                    name,
-                    price,
-                    instructorName: instructor.name,
-                    instructorId: instructor.id
-                };
-                courses.push(newCourse);
-                showNotification(`تم إضافة كورس <b>${name}</b> بنجاح.`);
+            } catch (error) {
+                console.error("Error saving course: ", error);
+                showNotification("حدث خطأ أثناء حفظ الكورس.");
             }
 
-            updateCoursesTable();
-            populateCoursesDropdowns();
             setCourseFormState('add'); // Reset form to 'add' state
         }
 
@@ -1171,18 +1204,21 @@
             );
         }
 
-        function deleteCourse(courseId) {
-            courses = courses.filter(c => c.id !== courseId);
-            updateCoursesTable();
-            populateCoursesDropdowns();
-            showNotification('تم حذف الكورس بنجاح.');
-            // If the deleted course was being edited, reset the form
-            if (editingCourseId === courseId) {
-                setCourseFormState('add');
+        async function deleteCourse(courseId) {
+            try {
+                await db.collection('courses').doc(courseId).delete();
+                showNotification('تم حذف الكورس بنجاح.');
+                // If the deleted course was being edited, reset the form
+                if (editingCourseId === courseId) {
+                    setCourseFormState('add');
+                }
+            } catch (error) {
+                console.error("Error deleting course: ", error);
+                showNotification("حدث خطأ أثناء حذف الكورس.");
             }
         }
 
-        function handlePayment(event, traineeId) {
+        async function handlePayment(event, traineeId) {
             event.preventDefault();
             const amountInput = document.getElementById(`payment-amount-${traineeId}`);
             const amount = parseFloat(amountInput.value);
@@ -1194,34 +1230,30 @@
 
             const trainee = trainees.find(t => t.id === traineeId);
             if (trainee) {
-                if (trainee.payment.paid + amount > trainee.payment.total) {
+                const newPaidAmount = (trainee.payment.paid || 0) + amount;
+                if (newPaidAmount > trainee.payment.total) {
                     showNotification('المبلغ المدفوع يتجاوز المبلغ الإجمالي المتبقي.');
                     return;
                 }
 
-                trainee.payment.paid += amount;
-
-                if (trainee.payment.paid >= trainee.payment.total) {
-                    trainee.payment.paid = trainee.payment.total;
-                    trainee.payment.status = 'مدفوع بالكامل';
-                } else if (trainee.payment.paid > 0) {
-                    trainee.payment.status = 'جزئي';
+                let newStatus = 'جزئي';
+                if (newPaidAmount >= trainee.payment.total) {
+                    newStatus = 'مدفوع بالكامل';
                 }
 
-                handleAttendanceSearch();
-                updateTraineesTable();
-                updateStats();
+                await db.collection('trainees').doc(traineeId).update({
+                    'payment.paid': newPaidAmount,
+                    'payment.status': newStatus
+                });
+
                 showNotification(`تم تسجيل دفعة بقيمة <b>${amount} EGP</b> للمتدرب <b>${trainee.name}</b>.`);
             }
         }
 
-        function activateTrainee(traineeId) {
+        async function activateTrainee(traineeId) {
             const trainee = trainees.find(t => t.id === traineeId);
             if (trainee) {
-                trainee.status = 'مفعل';
-                handleAttendanceSearch();
-                updateTraineesTable();
-                updateStats();
+                await db.collection('trainees').doc(traineeId).update({ status: 'مفعل' });
                 showNotification(`تم تفعيل حضور المتدرب <b>${trainee.name}</b> بنجاح.`);
             }
         }
@@ -1283,14 +1315,14 @@
                 const activationStatusClass = t.status === 'مفعل' ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-600';
 
                 return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition">
-                    <td class="p-3 text-gray-500">#${t.id}</td>
+                    <td class="p-3 text-gray-500">#${t.id.substring(0, 4)}</td>
                     <td class="p-3 font-bold text-gray-700">${t.name}<div class="text-xs text-gray-400 font-normal">${t.email || ''}</div></td>
                     <td class="p-3 font-mono text-gray-600">${t.code}</td>
                     <td class="p-3 text-gray-600">${t.phone}</td>
                     <td class="p-3"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">${t.service}</span></td>
                     <td class="p-3"><span class="${activationStatusClass} px-2 py-1 rounded text-xs">${t.status}</span></td>
                     <td class="p-3"><span class="${paymentStatusClass} px-2 py-1 rounded text-xs">${t.payment.status}</span><div class="text-xs text-gray-400 font-mono" dir="ltr">${t.payment.paid}/${t.payment.total}</div></td>
-                    <td class="p-3 text-gray-500 text-sm">${t.date}</td>
+                    <td class="p-3 text-gray-500 text-sm">${new Date(t.date).toLocaleDateString('ar-EG')}</td>
                 </tr>`;
             }).join('');
         }
@@ -1303,14 +1335,14 @@
             }
             tbody.innerHTML = instructors.map(i => `
                 <tr class="border-b border-gray-100 hover:bg-blue-50 transition">
-                    <td class="p-3 text-gray-500">#${i.id}</td>
+                    <td class="p-3 text-gray-500">#${i.id.substring(0, 4)}</td>
                     <td class="p-3 font-bold text-gray-700">${i.name}</td>
                     <td class="p-3 text-gray-600">${i.spec}</td>
                     <td class="p-3 text-gray-500 text-sm">${i.email || 'N/A'}</td>
                     <td class="p-3">
                         <div class="flex gap-2">
-                            <button onclick="editInstructor(${i.id})" class="text-sm text-blue-600 hover:text-blue-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-edit"></i> تعديل</button>
-                            <button onclick="confirmDeleteInstructor(${i.id})" class="text-sm text-red-600 hover:text-red-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-trash-alt"></i> حذف</button>
+                            <button onclick="editInstructor('${i.id}')" class="text-sm text-blue-600 hover:text-blue-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-edit"></i> تعديل</button>
+                            <button onclick="confirmDeleteInstructor('${i.id}')" class="text-sm text-red-600 hover:text-red-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-trash-alt"></i> حذف</button>
                         </div>
                     </td>
                 </tr>
@@ -1325,13 +1357,13 @@
             }
             tbody.innerHTML = courses.map(c => `
                 <tr class="border-b border-gray-100 hover:bg-blue-50 transition">
-                    <td class="p-3 text-gray-500">#${c.id}</td>
+                    <td class="p-3 text-gray-500">#${c.id.substring(0, 4)}</td>
                     <td class="p-3 font-bold text-gray-700">${c.name}</td>
                     <td class="p-3 text-gray-600">${c.price} EGP</td>
                     <td class="p-3">
                         <div class="flex gap-2">
-                            <button onclick="editCourse(${c.id})" class="text-sm text-blue-600 hover:text-blue-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-edit"></i> تعديل</button>
-                            <button onclick="confirmDeleteCourse(${c.id})" class="text-sm text-red-600 hover:text-red-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-trash-alt"></i> حذف</button>
+                            <button onclick="editCourse('${c.id}')" class="text-sm text-blue-600 hover:text-blue-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-edit"></i> تعديل</button>
+                            <button onclick="confirmDeleteCourse('${c.id}')" class="text-sm text-red-600 hover:text-red-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-trash-alt"></i> حذف</button>
                         </div>
                     </td>
                     <td class="p-3 text-gray-500 text-sm">${c.instructorName}</td>
