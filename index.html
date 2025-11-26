@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWC System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .sidebar-link.active { background-color: rgba(255, 255, 255, 0.1); border-right: 4px solid #FBBF24; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E3A8A', // Dark Blue
+                        secondary: '#1D4ED8', // Medium Blue
+                        accent: '#FBBF24', // Yellow/Amber
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <main class="flex min-h-screen">
+        <!-- Sidebar -->
+        <nav class="bg-primary text-white w-64 p-4 pt-8 space-y-6 hidden md:block">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold">AWC System</h1>
+                <p class="text-sm text-blue-300">للاستشارات والتدريب</p>
+            </div>
+            <ul class="space-y-2">
+                <li>
+                    <a href="#" onclick="showView('dashboard')" id="nav-dashboard" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-tachometer-alt ml-3 w-6 text-center"></i>
+                        <span>لوحة التحكم</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showView('register')" id="nav-register" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-user-plus ml-3 w-6 text-center"></i>
+                        <span>تسجيل متدرب</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showView('attendance')" id="nav-attendance" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-user-check ml-3 w-6 text-center"></i>
+                        <span>تفعيل الحضور</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showView('certificates')" id="nav-certificates" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-award ml-3 w-6 text-center"></i>
+                        <span>إصدار الشهادات</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showView('lectures')" id="nav-lectures" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-video ml-3 w-6 text-center"></i>
+                        <span>المحاضرات</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showView('instructors')" id="nav-instructors" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-chalkboard-teacher ml-3 w-6 text-center"></i>
+                        <span>إدارة المدربين</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showView('courses')" id="nav-courses" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-book-open ml-3 w-6 text-center"></i>
+                        <span>إدارة الكورسات</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showView('reports')" id="nav-reports" class="sidebar-link flex items-center px-6 py-3 cursor-pointer">
+                        <i class="fas fa-chart-pie ml-3 w-6 text-center"></i>
+                        <span>التقارير</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-4 md:p-8">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <h2 id="page-title" class="text-2xl font-bold text-gray-800">لوحة التحكم</h2>
+                <div class="flex items-center gap-4">
+                    <button class="text-gray-500 hover:text-primary">
+                        <i class="fas fa-bell text-xl"></i>
+                    </button>
+                    <div class="w-10 h-10 bg-gray-300 rounded-full"></div>
+                    <button class="md:hidden text-gray-600 text-2xl" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden" onclick="toggleMobileMenu()"></div>
+            <nav id="mobile-menu" class="fixed top-0 right-0 h-full bg-primary text-white w-64 p-4 pt-8 space-y-6 z-40 transform translate-x-full transition-transform duration-300 md:hidden">
+                <div class="text-center mb-8">
+                    <h1 class="text-2xl font-bold">AWC System</h1>
+                    <p class="text-sm text-blue-300">للاستشارات والتدريب</p>
+                </div>
+                <ul class="space-y-2">
+                    <li><a href="#" onclick="showView('dashboard'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">لوحة التحكم</a></li>
+                    <li><a href="#" onclick="showView('register'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">تسجيل متدرب</a></li>
+                    <li><a href="#" onclick="showView('attendance'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">تفعيل الحضور</a></li>
+                    <li><a href="#" onclick="showView('certificates'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">إصدار الشهادات</a></li>
+                    <li><a href="#" onclick="showView('lectures'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">المحاضرات</a></li>
+                    <li><a href="#" onclick="showView('instructors'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">إدارة المدربين</a></li>
+                    <li><a href="#" onclick="showView('courses'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">إدارة الكورسات</a></li>
+                    <li><a href="#" onclick="showView('reports'); toggleMobileMenu()" class="block px-6 py-3 hover:bg-blue-800">التقارير</a></li>
+                </ul>
+            </nav>
+
+            <!-- 1. Dashboard View -->
+            <div id="view-dashboard" class="view-section fade-in">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Students -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-500 text-sm">إجمالي المتدربين</p>
+                                <h3 class="text-2xl font-bold mt-1" id="stat-total-students">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Active Students -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-500 text-sm">نشط حالياً</p>
+                                <h3 class="text-2xl font-bold mt-1" id="stat-active-students">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Total Lectures -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-500 text-sm">إجمالي المحاضرات</p>
+                                <h3 class="text-2xl font-bold mt-1" id="stat-total-lectures">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xl">
+                                <i class="fas fa-video"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Certificates Issued -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-500 text-sm">الشهادات الصادرة</p>
+                                <h3 class="text-2xl font-bold mt-1">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl">
+                                <i class="fas fa-award"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions & Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Quick Actions -->
+                    <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-blue-800 mb-4">إجراءات سريعة</h3>
+                        <div class="space-y-3">
+                            <button onclick="showView('register')" class="w-full text-left flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-100 rounded-lg transition">
+                                <i class="fas fa-user-plus text-blue-500"></i>
+                                <span>تسجيل متدرب جديد</span>
+                            </button>
+                            <button onclick="showView('lectures')" class="w-full text-left flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-100 rounded-lg transition">
+                                <i class="fas fa-calendar-plus text-blue-500"></i>
+                                <span>إضافة محاضرة جديدة</span>
+                            </button>
+                            <button onclick="showView('reports')" class="w-full text-left flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-100 rounded-lg transition">
+                                <i class="fas fa-chart-line text-blue-500"></i>
+                                <span>عرض التقارير</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Recent Activity -->
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-blue-800 mb-4">آخر النشاطات</h3>
+                        <div class="text-center text-gray-400 py-8">
+                            <i class="fas fa-history text-3xl mb-2"></i>
+                            <p>لا توجد نشاطات حديثة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Register View -->
+            <div id="view-register" class="view-section fade-in hidden">
+                <div class="bg-primary text-white p-6 rounded-t-xl flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold">تسجيل متدرب جديد</h2>
+                        <p class="text-blue-200 text-sm mt-1">أدخل بيانات المتدرب لإضافته للنظام</p>
+                    </div>
+                    <i class="fas fa-user-plus text-3xl opacity-50"></i>
+                </div>
+                <div class="bg-white p-6 rounded-b-xl shadow-sm border border-t-0 border-gray-100">
+                    <form id="registerForm" onsubmit="handleRegister(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Trainee Name -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">اسم المتدرب <span class="text-red-500">*</span></label>
+                                <input type="text" id="reg-name" required placeholder="الاسم الكامل" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <!-- Phone Number -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف <span class="text-red-500">*</span></label>
+                                <input type="tel" id="reg-phone" required placeholder="01xxxxxxxxx" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-left" dir="ltr">
+                            </div>
+                            <!-- Email -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                                <input type="email" id="reg-email" placeholder="example@email.com" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-left" dir="ltr">
+                            </div>
+                            <!-- Service Type -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">نوع الخدمة <span class="text-red-500">*</span></label>
+                                <select id="reg-service" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                    <option value="">-- اختر النوع --</option>
+                                    <!-- JS will populate this with courses -->
+                                    <option value="استشارات مالية" data-price="500">استشارات مالية</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                            <i class="fas fa-plus"></i> إضافة المتدرب
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 3. Attendance View -->
+            <div id="view-attendance" class="view-section fade-in hidden">
+                <div class="bg-primary text-white p-6 rounded-t-xl flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold">تفعيل الحضور والدفع</h2>
+                        <p class="text-blue-200 text-sm mt-1">ابحث عن المتدرب وقم بتفعيل حضوره وتسجيل الدفع</p>
+                    </div>
+                    <i class="fas fa-user-check text-3xl opacity-50"></i>
+                </div>
+
+                <div class="bg-white p-6 rounded-b-xl shadow-sm border border-t-0 border-gray-100 min-h-[400px]">
+                    <!-- Search Bar -->
+                    <div class="mb-8">
+                        <div class="relative">
+                            <input type="text" id="attendance-search-input" onkeyup="handleAttendanceSearch()" placeholder="ابحث بكود المتدرب, الاسم, أو رقم الهاتف..." class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none pl-10">
+                            <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Results Container -->
+                    <div id="attendance-results-container">
+                        <!-- Initial State -->
+                        <div class="flex flex-col items-center justify-center text-gray-400 py-12">
+                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4"><i class="fas fa-search text-gray-300"></i></div>
+                            <p>ابحث عن متدرب لعرض بياناته وتفعيل الحضور</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Certificates View -->
+            <div id="view-certificates" class="view-section fade-in hidden">
+                <div class="bg-primary text-white p-6 rounded-t-xl flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold">إصدار الشهادات</h2>
+                        <p class="text-blue-200 text-sm mt-1">ابحث عن متدرب لإصدار شهادة إتمام الكورس</p>
+                    </div>
+                    <i class="fas fa-award text-3xl opacity-50"></i>
+                </div>
+                <div class="bg-white p-6 rounded-b-xl shadow-sm border border-t-0 border-gray-100 min-h-[400px]">
+                    <div class="flex flex-col items-center justify-center text-gray-400 py-12">
+                        <i class="fas fa-tools text-4xl mb-4"></i>
+                        <p>هذه الصفحة قيد الإنشاء</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Lectures View -->
+            <div id="view-lectures" class="view-section fade-in hidden">
+                <div class="bg-primary text-white p-6 rounded-t-xl flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold">إدارة المحاضرات</h2>
+                        <p class="text-blue-200 text-sm mt-1">إضافة وتعديل المحاضرات المجدولة والمسجلة</p>
+                    </div>
+                    <i class="fas fa-video text-3xl opacity-50"></i>
+                </div>
+
+                <div class="bg-white p-6 rounded-b-xl shadow-sm border border-t-0 border-gray-100">
+                    
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                        <button id="tab-add-lecture" onclick="switchLectureTab('add')" class="px-6 py-3 text-gray-500 hover:text-blue-500 font-medium focus:outline-none flex items-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-plus-circle"></i> إضافة محاضرة
+                        </button>
+                        <button id="tab-upcoming-lectures" onclick="switchLectureTab('upcoming')" class="px-6 py-3 text-gray-500 hover:text-blue-500 font-medium focus:outline-none flex items-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-calendar-alt"></i> المحاضرات القادمة
+                        </button>
+                        <button id="tab-recorded-lectures" onclick="switchLectureTab('recorded')" class="px-6 py-3 text-gray-500 hover:text-blue-500 font-medium focus:outline-none flex items-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-history"></i> الأرشيف المسجل
+                        </button>
+                    </div>
+
+                    <!-- Add Lecture Form -->
+                    <div id="lecture-tab-add">
+                        <form id="lectureForm" onsubmit="handleAddLecture(event)">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">عنوان المحاضرة <span class="text-red-500">*</span></label>
+                                    <input type="text" id="lec-title" required placeholder="مثال: شرح المحاسبة المالية - الدرس 1" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">الكورس التابع له <span class="text-red-500">*</span></label>
+                                    <select id="lec-course" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                        <option value="">-- اختر الكورس --</option>
+                                        <!-- JS will populate this -->
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">التاريخ <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <input type="date" id="lec-date" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">الوقت <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <input type="time" id="lec-time" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">المحاضر <span class="text-red-500">*</span></label>
+                                    <select id="lec-instructor-select" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                        <option value="">-- اختر المحاضر --</option>
+                                        <!-- JS will populate this -->
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">رابط Zoom / الفيديو</label>
+                                    <input type="url" id="lec-link" placeholder="https://zoom.us/..." class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-left" dir="ltr">
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">حالة المحاضرة</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="lec_status" value="upcoming" checked class="w-4 h-4 text-blue-600">
+                                            <span>قادمة (مجدولة)</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="lec_status" value="recorded" class="w-4 h-4 text-blue-600">
+                                            <span>مسجلة (للأرشيف)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ملاحظات إضافية</label>
+                                    <textarea class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none h-24" placeholder="تفاصيل عن محتوى المحاضرة..."></textarea>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                                <i class="fas fa-save"></i> حفظ المحاضرة
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Upcoming Lectures List -->
+                    <div id="lecture-tab-upcoming" class="hidden">
+                        <div id="upcoming-lectures-container" class="space-y-4">
+                            <!-- JS will populate this -->
+                        </div>
+                    </div>
+
+                    <!-- Recorded Lectures List -->
+                    <div id="lecture-tab-recorded" class="hidden">
+                        <div id="recorded-lectures-container" class="space-y-4">
+                            <!-- JS will populate this -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Reports View -->
+            <div id="view-reports" class="view-section fade-in hidden">
+                <div class="bg-primary text-white p-6 rounded-t-xl mb-0">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i class="fas fa-chart-pie"></i> التقارير والإحصائيات
+                    </h2>
+                    <p class="text-blue-200 text-sm mt-1">تحليل شامل ومفصل لبيانات النظام، المدفوعات، وتوزيع الكورسات</p>
+                </div>
+
+                <!-- Report Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-b-xl shadow-sm border border-gray-100 mb-6">
+                    <div class="border rounded-lg p-4 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-3xl font-bold text-gray-700" id="report-total-students">0</h3>
+                            <p class="text-xs text-gray-500">إجمالي المتدربين</p>
+                        </div>
+                        <div class="bg-blue-100 text-blue-600 p-3 rounded-lg">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-4 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-3xl font-bold text-gray-700" id="report-active-students">0</h3>
+                            <p class="text-xs text-gray-500">تم تفعيلهم</p>
+                        </div>
+                        <div class="bg-green-100 text-green-600 p-3 rounded-lg">
+                            <i class="fas fa-check text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-4 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-3xl font-bold text-gray-700">0</h3>
+                            <p class="text-xs text-gray-500">الشهادات الصادرة</p>
+                        </div>
+                        <div class="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
+                            <i class="fas fa-sun text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Placeholders -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-bar"></i> توزيع المتدربين حسب الكورس
+                        </h3>
+                        <!-- Mock Chart -->
+                        <div class="h-48 flex items-end justify-around gap-2 px-4 border-b border-l border-gray-200 pb-2">
+                            <div class="w-full bg-blue-100 rounded-t hover:bg-blue-200 transition relative group h-3/4">
+                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition">75%</span>
+                            </div>
+                            <div class="w-full bg-blue-300 rounded-t hover:bg-blue-400 transition relative group h-1/2">
+                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition">50%</span>
+                            </div>
+                            <div class="w-full bg-blue-500 rounded-t hover:bg-blue-600 transition relative group h-1/4">
+                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition">25%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-2">
+                            <span>محاسبة</span>
+                            <span>إكسيل</span>
+                            <span>ضرائب</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-blue-800 mb-4">حالة الدفع</h3>
+                        <div class="h-48 flex items-center justify-center">
+                            <div class="text-center text-gray-400">
+                                <i class="fas fa-wallet text-4xl mb-2 opacity-30"></i>
+                                <p>لا توجد بيانات كافية</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-4 text-xs mt-2">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded-sm"></span> مدفوع</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-400 rounded-sm"></span> جزئي</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-300 rounded-sm"></span> غير مفعل</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-table"></i> سجل المتدربين التفصيلي
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right">
+                            <thead class="bg-gray-50 text-gray-600 text-sm">
+                                <tr>
+                                    <th class="p-3 rounded-r-lg">#</th>
+                                    <th class="p-3">اسم المتدرب</th>
+                                    <th class="p-3">كود المتدرب</th>
+                                    <th class="p-3">رقم الهاتف</th>
+                                    <th class="p-3">الكورس / الخدمة</th>
+                                    <th class="p-3">حالة التفعيل</th>
+                                    <th class="p-3">حالة الدفع</th>
+                                    <th class="p-3 rounded-l-lg w-28">تاريخ التسجيل</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainees-table-body">
+                                <!-- JS will populate this -->
+                                <tr>
+                                    <td colspan="8" class="text-center py-8 text-gray-400">
+                                        <i class="fas fa-inbox text-2xl mb-2"></i>
+                                        <p>لا توجد بيانات متاحة للعرض حالياً</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Instructors View -->
+            <div id="view-instructors" class="view-section fade-in hidden">
+                <div class="bg-primary text-white p-6 rounded-t-xl flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold">إدارة المدربين</h2>
+                        <p class="text-blue-200 text-sm mt-1">إضافة وتعديل بيانات المدربين في الأكاديمية</p>
+                    </div>
+                    <i class="fas fa-chalkboard-teacher text-3xl opacity-50"></i>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                    <!-- Add Instructor Form -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                                <i class="fas fa-user-plus"></i> إضافة مدرب جديد
+                            </h3>
+                            <form id="addInstructorForm" onsubmit="handleAddInstructor(event)">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">اسم المدرب <span class="text-red-500">*</span></label>
+                                        <input type="text" id="inst-name" required placeholder="الاسم الكامل للمدرب" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">التخصص <span class="text-red-500">*</span></label>
+                                        <input type="text" id="inst-spec" required placeholder="مثال: محاسبة مالية" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                                        <input type="email" id="inst-email" placeholder="email@example.com" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                    <button type="submit" class="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                                        <i class="fas fa-plus"></i> إضافة المدرب
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Instructors Table -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                                <i class="fas fa-users"></i> قائمة المدربين
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right">
+                                    <thead class="bg-gray-50 text-gray-600 text-sm">
+                                        <tr>
+                                            <th class="p-3 rounded-r-lg">#</th>
+                                            <th class="p-3 w-1/3">اسم المدرب</th>
+                                            <th class="p-3 w-1/3">التخصص</th>
+                                            <th class="p-3">البريد الإلكتروني</th>
+                                            <th class="p-3 rounded-l-lg">إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="instructors-table-body">
+                                        <tr><td colspan="5" class="text-center py-8 text-gray-400"><p>لا يوجد مدربين مسجلين بعد.</p></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Courses View -->
+            <div id="view-courses" class="view-section fade-in hidden">
+                <div class="bg-primary text-white p-6 rounded-t-xl flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold">إدارة الكورسات</h2>
+                        <p class="text-blue-200 text-sm mt-1">إضافة وتعديل الكورسات المتاحة في الأكاديمية</p>
+                    </div>
+                    <i class="fas fa-book-open text-3xl opacity-50"></i>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                    <!-- Add Course Form -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                                <i class="fas fa-plus-circle"></i> إضافة كورس جديد
+                            </h3>
+                            <form id="addCourseForm" onsubmit="handleAddCourse(event)">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">اسم الكورس <span class="text-red-500">*</span></label>
+                                        <input type="text" id="course-name" required placeholder="مثال: المحاسبة للمبتدئين" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">سعر الكورس (EGP) <span class="text-red-500">*</span></label>
+                                        <input type="number" id="course-price" required placeholder="1500" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">المدرب المسؤول <span class="text-red-500">*</span></label>
+                                        <select id="course-instructor" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                            <option value="">-- اختر المدرب --</option>
+                                            <!-- JS will populate this -->
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                                        <i class="fas fa-plus"></i> إضافة الكورس
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Courses Table -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                                <i class="fas fa-list-ul"></i> قائمة الكورسات
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right">
+                                    <thead class="bg-gray-50 text-gray-600 text-sm">
+                                        <tr>
+                                            <th class="p-3 rounded-r-lg">#</th>
+                                            <th class="p-3 w-1/2">اسم الكورس</th>
+                                            <th class="p-3">السعر</th>
+                                            <th class="p-3">إجراءات</th>
+                                            <th class="p-3 rounded-l-lg">المدرب</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="courses-table-body">
+                                        <tr><td colspan="5" class="text-center py-8 text-gray-400"><p>لا توجد كورسات مسجلة بعد.</p></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-2xl p-6 w-96 relative z-10 transform scale-95 transition-transform duration-200" id="confirmation-content">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2" id="confirmation-title">هل أنت متأكد؟</h3>
+                <div class="text-gray-600 mb-6" id="confirmation-message">لا يمكن التراجع عن هذا الإجراء.</div>
+                <div class="flex justify-center gap-4">
+                    <button id="confirm-delete-btn" class="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 transition">تأكيد الحذف</button>
+                    <button onclick="closeConfirmationModal()" class="bg-gray-200 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-300 transition">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Notification -->
+    <div id="notification-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+        <div class="bg-white rounded-lg shadow-2xl p-6 w-96 relative z-10 transform scale-95 transition-transform duration-200" id="notification-content">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">تمت العملية بنجاح!</h3>
+                <!-- Changed to allow HTML content -->
+                <div class="text-gray-600 mb-6" id="notification-message">تم حفظ البيانات في النظام.</div>
+                <button onclick="closeNotification()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">حسناً</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Store (Mock Database)
+        let trainees = [];
+        let lectures = [];
+        let instructors = [];
+        let courses = [];
+        let editingInstructorId = null;
+        let editingCourseId = null;
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            showView('dashboard');
+            updateStats();
+            populateInstructorsDropdowns();
+            populateCoursesDropdowns();
+            updateLectureLists();
+            updateInstructorsTable();
+            updateCoursesTable();
+        });
+
+        // Navigation Logic
+        function showView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Show selected view
+            const target = document.getElementById(`view-${viewId}`);
+            if(target) {
+                target.classList.remove('hidden');
+                target.classList.add('fade-in');
+            }
+
+            if (viewId === 'lectures') {
+                switchLectureTab('add');
+            }
+            if (viewId === 'instructors') {
+                setInstructorFormState('add');
+            }
+            if (viewId === 'courses') {
+                setCourseFormState('add');
+            }
+
+            // Update Sidebar Active State
+            document.querySelectorAll('.sidebar-link').forEach(el => {
+                el.classList.remove('active', 'border-r-4', 'border-accent', 'bg-white/10');
+            });
+            const activeNav = document.getElementById(`nav-${viewId}`);
+            if(activeNav) {
+                activeNav.classList.add('active', 'border-r-4', 'border-accent', 'bg-white/10');
+            }
+
+            // Update Header Title
+            const titles = {
+                'dashboard': 'لوحة التحكم',
+                'register': 'تسجيل المتدربين',
+                'attendance': 'تفعيل الحضور',
+                'certificates': 'إصدار الشهادات',
+                'lectures': 'إدارة المحاضرات',
+                'instructors': 'إدارة المدربين',
+                'courses': 'إدارة الكورسات',
+                'reports': 'التقارير والإحصائيات'
+            };
+            document.getElementById('page-title').textContent = titles[viewId] || 'AWC System';
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            
+            if (menu.classList.contains('translate-x-full')) {
+                menu.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                menu.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function generateTraineeCode() {
+            const prefix = 'AWC';
+            const randomNumber = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
+            return `${prefix}${randomNumber}`;
+        }
+
+        // Handlers
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            // UI References
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = btn.innerHTML;
+            
+            // 1. Loading State (Simulate Processing)
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التسجيل وإرسال البريد...';
+
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+            const email = document.getElementById('reg-email').value; // Get Email
+            const serviceSelect = document.getElementById('reg-service');
+            const service = serviceSelect.value;
+            const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+            const coursePrice = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 1500; // Default price if not found
+            
+            // 2. Simulate Network Delay (e.g., Sending Email via API)
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const traineeCode = generateTraineeCode();
+
+            const newTrainee = {
+                id: trainees.length + 1,
+                code: traineeCode,
+                name: name,
+                phone: phone,
+                email: email, // Store Email
+                service: service,
+                status: 'غير مفعل',
+                payment: {
+                    total: coursePrice, // Use dynamic price
+                    paid: 0,
+                    status: 'غير مدفوع'
+                },
+                date: new Date().toLocaleDateString('ar-EG')
+            };
+
+            trainees.push(newTrainee);
+            
+            // Reset and Notify
+            e.target.reset();
+            updateStats();
+            updateTraineesTable();
+            
+            // 3. Reset Button
+            btn.disabled = false;
+            btn.innerHTML = originalBtnText;
+
+            // 4. Construct Email Confirmation Message
+            const successMessage = `
+                <div class="text-center">
+                    <p class="mb-2">تم تسجيل المتدرب <b>${name}</b> بنجاح.</p>
+                    <div class="bg-blue-50 text-blue-700 p-3 rounded-lg text-sm text-right mt-3 border border-blue-100">
+                        <div class="font-bold flex items-center gap-2 mb-2">
+                            <i class="fas fa-envelope-open-text"></i>
+                            تأكيد البريد الإلكتروني
+                        </div>
+                        <p>تم إرسال رسالة ترحيبية وتفاصيل التسجيل إلى:</p>
+                        <p class="font-mono mt-1 text-left text-xs" dir="ltr">${email}</p>
+                        <div class="mt-3 pt-3 border-t border-blue-200">
+                            <p>كود المتدرب الخاص به هو:</p>
+                            <p class="font-bold text-lg tracking-widest mt-1">${traineeCode}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showNotification(successMessage);
+        }
+
+        function handleAttendanceSearch() {
+            const searchTerm = document.getElementById('attendance-search-input').value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('attendance-results-container');
+
+            if (!searchTerm) {
+                resultsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-gray-400 py-12">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4">
+                            <i class="fas fa-search text-gray-300"></i>
+                        </div>
+                        <p>ابحث عن متدرب لعرض بياناته وتفعيل الحضور</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const results = trainees.filter(t => 
+                t.name.toLowerCase().includes(searchTerm) ||
+                t.phone.includes(searchTerm) ||
+                (t.code && t.code.toLowerCase().includes(searchTerm))
+            );
+
+            if (results.length > 0) {
+                resultsContainer.innerHTML = results.map(trainee => renderTraineeCard(trainee)).join('');
+            } else {
+                resultsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-gray-400 py-12">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4">
+                            <i class="fas fa-user-slash text-gray-300"></i>
+                        </div>
+                        <p>لم يتم العثور على متدرب يطابق بحثك.</p>
+                        <p class="text-sm mt-1">جرّب البحث بالاسم، الكود، أو رقم الهاتف.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderTraineeCard(trainee) {
+            const isActivated = trainee.status === 'مفعل';
+            const activationButton = isActivated 
+                ? `<button disabled class="w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"><i class="fas fa-check-circle"></i> تم التفعيل</button>`
+                : `<button onclick="activateTrainee(${trainee.id})" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"><i class="fas fa-user-check"></i> تفعيل الحضور</button>`;
+
+            const isFullyPaid = trainee.payment.status === 'مدفوع بالكامل';
+            const paymentSection = isFullyPaid
+                ? `<div class="text-center p-2 bg-green-50 border border-green-200 rounded-md text-sm text-green-700 font-semibold"><i class="fas fa-check-circle"></i> مكتمل السداد</div>`
+                : `<form onsubmit="handlePayment(event, ${trainee.id})" class="flex items-center gap-2">
+                        <input type="number" id="payment-amount-${trainee.id}" placeholder="أدخل المبلغ" required min="1" class="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1.5 px-3 rounded-md text-sm transition flex items-center justify-center"><i class="fas fa-dollar-sign"></i></button>
+                   </form>`;
+            
+            const paidPercent = (trainee.payment.paid / trainee.payment.total) * 100;
+
+            let paymentStatusColor = 'text-red-600';
+            if (trainee.payment.status === 'مدفوع بالكامل') paymentStatusColor = 'text-green-600';
+            else if (trainee.payment.status === 'جزئي') paymentStatusColor = 'text-yellow-600';
+
+            return `
+                <div class="border border-gray-200 rounded-lg p-4 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:bg-gray-50 transition">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3"><span class="font-bold text-lg text-primary">${trainee.name}</span><span class="bg-yellow-100 text-yellow-800 text-xs font-mono px-2 py-1 rounded">${trainee.code}</span></div>
+                        <div class="text-sm text-gray-500 mt-2 flex items-center gap-4">
+                            <span class="flex items-center gap-2"><i class="fas fa-phone fa-flip-horizontal"></i> ${trainee.phone}</span>
+                            <span class="flex items-center gap-2"><i class="fas fa-envelope"></i> ${trainee.email}</span>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-80 flex flex-col gap-3">
+                        <div class="flex justify-between text-sm"><span class="text-gray-600">حالة التفعيل:</span><span class="font-bold ${trainee.status === 'مفعل' ? 'text-green-600' : 'text-gray-500'}">${trainee.status}</span></div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1"><span class="text-gray-600">حالة الدفع:</span><span class="font-bold ${paymentStatusColor}">${trainee.payment.status}</span></div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full transition-all duration-500" style="width: ${paidPercent}%"></div></div>
+                            <div class="text-xs text-gray-500 text-center mt-1 font-mono" dir="ltr">${trainee.payment.paid} / ${trainee.payment.total} EGP</div>
+                        </div>
+                        <div class="mt-1 border-t pt-3">
+                            <label class="text-xs font-bold text-gray-500 mb-1 block">تسجيل دفعة جديدة</label>
+                            ${paymentSection}
+                        </div>
+                        <div class="mt-1">${activationButton}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleAddLecture(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('lec-title').value;
+            const courseId = document.getElementById('lec-course').value;
+            const date = document.getElementById('lec-date').value;
+            const time = document.getElementById('lec-time').value;
+            const instructorId = document.getElementById('lec-instructor-select').value;
+            const link = document.getElementById('lec-link').value;
+            const status = document.querySelector('input[name="lec_status"]:checked').value;
+
+            const course = courses.find(c => c.id == courseId);
+            const instructor = instructors.find(i => i.id == instructorId);
+
+            lectures.push({ 
+                id: lectures.length + 1,
+                title, 
+                courseName: course ? course.name : 'N/A',
+                instructorName: instructor ? instructor.name : 'N/A',
+                date,
+                time,
+                link,
+                status
+            });
+            
+            e.target.reset();
+            updateStats();
+            updateLectureLists();
+            showNotification('تم جدولة المحاضرة وإضافتها للنظام بنجاح.');
+            switchLectureTab(status === 'upcoming' ? 'upcoming' : 'recorded');
+        }
+
+        function handleAddInstructor(e) {
+            e.preventDefault();
+            const name = document.getElementById('inst-name').value;
+            const spec = document.getElementById('inst-spec').value;
+            const email = document.getElementById('inst-email').value;
+
+            if (editingInstructorId) {
+                // Update existing instructor
+                const instructor = instructors.find(i => i.id === editingInstructorId);
+                if (instructor) {
+                    instructor.name = name;
+                    instructor.spec = spec;
+                    instructor.email = email;
+                    showNotification(`تم تحديث بيانات المدرب <b>${name}</b> بنجاح.`);
+                }
+            } else {
+                // Add new instructor
+                const newInstructor = {
+                    id: instructors.length > 0 ? Math.max(...instructors.map(i => i.id)) + 1 : 1,
+                    name,
+                    spec,
+                    email
+                };
+                instructors.push(newInstructor);
+                showNotification(`تم إضافة المدرب <b>${name}</b> بنجاح.`);
+            }
+
+            updateInstructorsTable();
+            populateInstructorsDropdowns();
+            setInstructorFormState('add'); // Reset form to 'add' state
+        }
+
+        function setInstructorFormState(state) {
+            const form = document.getElementById('addInstructorForm');
+            const title = form.previousElementSibling;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            let cancelBtn = document.getElementById('cancel-inst-edit');
+
+            if (state === 'edit') {
+                title.innerHTML = '<i class="fas fa-edit"></i> تعديل بيانات المدرب';
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> حفظ التعديلات';
+                submitBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                submitBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+
+                if (!cancelBtn) {
+                    cancelBtn = document.createElement('button');
+                    cancelBtn.id = 'cancel-inst-edit';
+                    cancelBtn.type = 'button';
+                    cancelBtn.textContent = 'إلغاء التعديل';
+                    cancelBtn.className = 'w-full mt-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition';
+                    cancelBtn.onclick = () => setInstructorFormState('add');
+                    submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+                }
+                cancelBtn.classList.remove('hidden');
+
+            } else { // 'add' state
+                title.innerHTML = '<i class="fas fa-user-plus"></i> إضافة مدرب جديد';
+                submitBtn.innerHTML = '<i class="fas fa-plus"></i> إضافة المدرب';
+                submitBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                submitBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                if (cancelBtn) {
+                    cancelBtn.classList.add('hidden');
+                }
+                form.reset();
+                editingInstructorId = null;
+            }
+        }
+
+        function editInstructor(instructorId) {
+            const instructor = instructors.find(i => i.id === instructorId);
+            if (instructor) {
+                editingInstructorId = instructorId;
+                document.getElementById('inst-name').value = instructor.name;
+                document.getElementById('inst-spec').value = instructor.spec;
+                document.getElementById('inst-email').value = instructor.email;
+                setInstructorFormState('edit');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function confirmDeleteInstructor(instructorId) {
+            const instructor = instructors.find(i => i.id === instructorId);
+            if (!instructor) return;
+
+            showConfirmationModal(
+                'تأكيد حذف المدرب',
+                `هل أنت متأكد من رغبتك في حذف المدرب <b>${instructor.name}</b>؟`,
+                () => deleteInstructor(instructorId)
+            );
+        }
+
+        function deleteInstructor(instructorId) {
+            instructors = instructors.filter(i => i.id !== instructorId);
+            updateInstructorsTable();
+            populateInstructorsDropdowns();
+            showNotification('تم حذف المدرب بنجاح.');
+            // If the deleted instructor was being edited, reset the form
+            if (editingInstructorId === instructorId) {
+                setInstructorFormState('add');
+            }
+        }
+
+        function handleAddCourse(e) {
+            e.preventDefault();
+            const name = document.getElementById('course-name').value;
+            const price = parseFloat(document.getElementById('course-price').value);
+            const instructorId = parseInt(document.getElementById('course-instructor').value);
+            const instructor = instructors.find(i => i.id === instructorId);
+
+            if (!instructor) {
+                showNotification('الرجاء اختيار مدرب صحيح.');
+                return;
+            }
+
+            if (editingCourseId) {
+                // Update existing course
+                const course = courses.find(c => c.id === editingCourseId);
+                if (course) {
+                    course.name = name;
+                    course.price = price;
+                    course.instructorName = instructor.name;
+                    course.instructorId = instructor.id;
+                    showNotification(`تم تحديث بيانات كورس <b>${name}</b> بنجاح.`);
+                }
+            } else {
+                // Add new course
+                const newCourse = {
+                    id: courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1,
+                    name,
+                    price,
+                    instructorName: instructor.name,
+                    instructorId: instructor.id
+                };
+                courses.push(newCourse);
+                showNotification(`تم إضافة كورس <b>${name}</b> بنجاح.`);
+            }
+
+            updateCoursesTable();
+            populateCoursesDropdowns();
+            setCourseFormState('add'); // Reset form to 'add' state
+        }
+
+        function setCourseFormState(state) {
+            const form = document.getElementById('addCourseForm');
+            const title = form.previousElementSibling;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            let cancelBtn = document.getElementById('cancel-course-edit');
+
+            if (state === 'edit') {
+                title.innerHTML = '<i class="fas fa-edit"></i> تعديل بيانات الكورس';
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> حفظ التعديلات';
+                submitBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                submitBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+
+                if (!cancelBtn) {
+                    cancelBtn = document.createElement('button');
+                    cancelBtn.id = 'cancel-course-edit';
+                    cancelBtn.type = 'button';
+                    cancelBtn.textContent = 'إلغاء التعديل';
+                    cancelBtn.className = 'w-full mt-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition';
+                    cancelBtn.onclick = () => setCourseFormState('add');
+                    submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+                }
+                cancelBtn.classList.remove('hidden');
+
+            } else { // 'add' state
+                title.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة كورس جديد';
+                submitBtn.innerHTML = '<i class="fas fa-plus"></i> إضافة الكورس';
+                submitBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                submitBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                if (cancelBtn) {
+                    cancelBtn.classList.add('hidden');
+                }
+                form.reset();
+                editingCourseId = null;
+            }
+        }
+
+        function editCourse(courseId) {
+            const course = courses.find(c => c.id === courseId);
+            if (course) {
+                editingCourseId = courseId;
+                document.getElementById('course-name').value = course.name;
+                document.getElementById('course-price').value = course.price;
+                document.getElementById('course-instructor').value = course.instructorId;
+                setCourseFormState('edit');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function confirmDeleteCourse(courseId) {
+            const course = courses.find(c => c.id === courseId);
+            if (!course) return;
+
+            showConfirmationModal(
+                'تأكيد حذف الكورس',
+                `هل أنت متأكد من رغبتك في حذف الكورس <b>${course.name}</b>؟`,
+                () => deleteCourse(courseId)
+            );
+        }
+
+        function deleteCourse(courseId) {
+            courses = courses.filter(c => c.id !== courseId);
+            updateCoursesTable();
+            populateCoursesDropdowns();
+            showNotification('تم حذف الكورس بنجاح.');
+            // If the deleted course was being edited, reset the form
+            if (editingCourseId === courseId) {
+                setCourseFormState('add');
+            }
+        }
+
+        function handlePayment(event, traineeId) {
+            event.preventDefault();
+            const amountInput = document.getElementById(`payment-amount-${traineeId}`);
+            const amount = parseFloat(amountInput.value);
+
+            if (!amount || amount <= 0) {
+                showNotification('الرجاء إدخال مبلغ صحيح للدفع.');
+                return;
+            }
+
+            const trainee = trainees.find(t => t.id === traineeId);
+            if (trainee) {
+                if (trainee.payment.paid + amount > trainee.payment.total) {
+                    showNotification('المبلغ المدفوع يتجاوز المبلغ الإجمالي المتبقي.');
+                    return;
+                }
+
+                trainee.payment.paid += amount;
+
+                if (trainee.payment.paid >= trainee.payment.total) {
+                    trainee.payment.paid = trainee.payment.total;
+                    trainee.payment.status = 'مدفوع بالكامل';
+                } else if (trainee.payment.paid > 0) {
+                    trainee.payment.status = 'جزئي';
+                }
+
+                handleAttendanceSearch();
+                updateTraineesTable();
+                updateStats();
+                showNotification(`تم تسجيل دفعة بقيمة <b>${amount} EGP</b> للمتدرب <b>${trainee.name}</b>.`);
+            }
+        }
+
+        function activateTrainee(traineeId) {
+            const trainee = trainees.find(t => t.id === traineeId);
+            if (trainee) {
+                trainee.status = 'مفعل';
+                handleAttendanceSearch();
+                updateTraineesTable();
+                updateStats();
+                showNotification(`تم تفعيل حضور المتدرب <b>${trainee.name}</b> بنجاح.`);
+            }
+        }
+
+        function switchLectureTab(tab) {
+            // Tab buttons
+            const tabButtons = document.querySelectorAll('#view-lectures .flex.border-b button');
+            tabButtons.forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'font-bold');
+                btn.classList.add('text-gray-500', 'font-medium');
+            });
+            
+            let activeBtnId;
+            if (tab === 'add') activeBtnId = 'tab-add-lecture';
+            else if (tab === 'upcoming') activeBtnId = 'tab-upcoming-lectures';
+            else if (tab === 'recorded') activeBtnId = 'tab-recorded-lectures';
+
+            const activeBtn = document.getElementById(activeBtnId);
+            if (activeBtn) {
+                activeBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'font-bold');
+                activeBtn.classList.remove('text-gray-500', 'font-medium');
+            }
+
+            // Tab content
+            document.querySelectorAll('#view-lectures [id^="lecture-tab-"]').forEach(content => {
+                content.classList.add('hidden');
+            });
+            const activeContent = document.getElementById(`lecture-tab-${tab}`);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+            }
+        }
+
+        // UI Updates
+        function updateStats() {
+            const count = trainees.length;
+            const lecCount = lectures.length;
+            const activeCount = trainees.filter(t => t.status === 'مفعل').length;
+            
+            document.getElementById('stat-total-students').textContent = count;
+            document.getElementById('stat-active-students').textContent = activeCount;
+            document.getElementById('stat-total-lectures').textContent = lecCount;
+            document.getElementById('report-total-students').textContent = count;
+            document.getElementById('report-active-students').textContent = activeCount;
+        }
+
+        function updateTraineesTable() {
+            const tbody = document.getElementById('trainees-table-body');
+            
+            if (trainees.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-gray-400"><i class="fas fa-inbox text-2xl mb-2"></i><p>لا توجد بيانات متاحة للعرض حالياً</p></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = trainees.map(t => {
+                let paymentStatusClass = 'bg-red-100 text-red-600';
+                if (t.payment.status === 'مدفوع بالكامل') paymentStatusClass = 'bg-green-100 text-green-600';
+                else if (t.payment.status === 'جزئي') paymentStatusClass = 'bg-yellow-100 text-yellow-800';
+                const activationStatusClass = t.status === 'مفعل' ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-600';
+
+                return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition">
+                    <td class="p-3 text-gray-500">#${t.id}</td>
+                    <td class="p-3 font-bold text-gray-700">${t.name}<div class="text-xs text-gray-400 font-normal">${t.email || ''}</div></td>
+                    <td class="p-3 font-mono text-gray-600">${t.code}</td>
+                    <td class="p-3 text-gray-600">${t.phone}</td>
+                    <td class="p-3"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">${t.service}</span></td>
+                    <td class="p-3"><span class="${activationStatusClass} px-2 py-1 rounded text-xs">${t.status}</span></td>
+                    <td class="p-3"><span class="${paymentStatusClass} px-2 py-1 rounded text-xs">${t.payment.status}</span><div class="text-xs text-gray-400 font-mono" dir="ltr">${t.payment.paid}/${t.payment.total}</div></td>
+                    <td class="p-3 text-gray-500 text-sm">${t.date}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function updateInstructorsTable() {
+            const tbody = document.getElementById('instructors-table-body');
+            if (instructors.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400"><p>لا يوجد مدربين مسجلين بعد.</p></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = instructors.map(i => `
+                <tr class="border-b border-gray-100 hover:bg-blue-50 transition">
+                    <td class="p-3 text-gray-500">#${i.id}</td>
+                    <td class="p-3 font-bold text-gray-700">${i.name}</td>
+                    <td class="p-3 text-gray-600">${i.spec}</td>
+                    <td class="p-3 text-gray-500 text-sm">${i.email || 'N/A'}</td>
+                    <td class="p-3">
+                        <div class="flex gap-2">
+                            <button onclick="editInstructor(${i.id})" class="text-sm text-blue-600 hover:text-blue-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-edit"></i> تعديل</button>
+                            <button onclick="confirmDeleteInstructor(${i.id})" class="text-sm text-red-600 hover:text-red-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-trash-alt"></i> حذف</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateCoursesTable() {
+            const tbody = document.getElementById('courses-table-body');
+            if (courses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400"><p>لا توجد كورسات مسجلة بعد.</p></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = courses.map(c => `
+                <tr class="border-b border-gray-100 hover:bg-blue-50 transition">
+                    <td class="p-3 text-gray-500">#${c.id}</td>
+                    <td class="p-3 font-bold text-gray-700">${c.name}</td>
+                    <td class="p-3 text-gray-600">${c.price} EGP</td>
+                    <td class="p-3">
+                        <div class="flex gap-2">
+                            <button onclick="editCourse(${c.id})" class="text-sm text-blue-600 hover:text-blue-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-edit"></i> تعديل</button>
+                            <button onclick="confirmDeleteCourse(${c.id})" class="text-sm text-red-600 hover:text-red-800 font-bold py-1 px-2 rounded-md flex items-center gap-1"><i class="fas fa-trash-alt"></i> حذف</button>
+                        </div>
+                    </td>
+                    <td class="p-3 text-gray-500 text-sm">${c.instructorName}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateLectureLists() {
+            const upcomingContainer = document.getElementById('upcoming-lectures-container');
+            const recordedContainer = document.getElementById('recorded-lectures-container');
+
+            const upcomingLectures = lectures.filter(l => l.status === 'upcoming').sort((a, b) => new Date(a.date) - new Date(b.date));
+            const recordedLectures = lectures.filter(l => l.status === 'recorded').sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Render Upcoming
+            if (upcomingLectures.length > 0) {
+                upcomingContainer.innerHTML = upcomingLectures.map(l => renderLectureCard(l)).join('');
+            } else {
+                upcomingContainer.innerHTML = `<div class="text-center text-gray-400 py-12">
+                    <i class="fas fa-calendar-times text-4xl mb-3"></i>
+                    <p>لا توجد محاضرات قادمة مجدولة حالياً.</p>
+                </div>`;
+            }
+
+            // Render Recorded
+            if (recordedLectures.length > 0) {
+                recordedContainer.innerHTML = recordedLectures.map(l => renderLectureCard(l)).join('');
+            } else {
+                recordedContainer.innerHTML = `<div class="text-center text-gray-400 py-12">
+                    <i class="fas fa-archive text-4xl mb-3"></i>
+                    <p>لا توجد محاضرات مسجلة في الأرشيف حالياً.</p>
+                </div>`;
+            }
+        }
+
+        function renderLectureCard(lecture) {
+            const linkButton = lecture.link 
+                ? `<a href="${lecture.link}" target="_blank" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                    <i class="fab fa-youtube"></i> رابط المحاضرة
+                  </a>`
+                : `<span class="text-xs text-gray-400">لا يوجد رابط متاح</span>`;
+
+            return `
+            <div class="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-gray-50 transition">
+                <div class="flex-1">
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-semibold">${lecture.courseName}</span>
+                    <h4 class="font-bold text-lg text-gray-800 mt-1">${lecture.title}</h4>
+                    <div class="text-sm text-gray-500 mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <span class="flex items-center gap-2"><i class="fas fa-user-tie w-4 text-center"></i> ${lecture.instructorName || 'غير محدد'}</span>
+                        <span class="flex items-center gap-2"><i class="fas fa-calendar-day w-4 text-center"></i> ${new Date(lecture.date).toLocaleDateString('ar-EG')}</span>
+                        <span class="flex items-center gap-2"><i class="fas fa-clock w-4 text-center"></i> ${lecture.time}</span>
+                    </div>
+                </div>
+                <div class="w-full sm:w-auto">
+                    ${linkButton}
+                </div>
+            </div>
+            `;
+        }
+
+        function populateInstructorsDropdowns() {
+            const dropdowns = document.querySelectorAll('#course-instructor, #lec-instructor-select');
+            dropdowns.forEach(dropdown => {
+                const currentValue = dropdown.value;
+                dropdown.innerHTML = '<option value="">-- اختر المدرب --</option>';
+                instructors.forEach(i => {
+                    dropdown.innerHTML += `<option value="${i.id}">${i.name}</option>`;
+                });
+                dropdown.value = currentValue;
+            });
+        }
+
+        function populateCoursesDropdowns() {
+            const dropdowns = document.querySelectorAll('#reg-service, #lec-course');
+            dropdowns.forEach(dropdown => {
+                const currentValue = dropdown.value;
+                
+                if (dropdown.id === 'reg-service') {
+                    dropdown.innerHTML = '<option value="">-- اختر النوع --</option>';
+                    courses.forEach(c => {
+                        dropdown.innerHTML += `<option value="${c.name}" data-price="${c.price}">${c.name}</option>`;
+                    });
+                    // Also add the static option
+                    dropdown.innerHTML += `<option value="استشارات مالية" data-price="500">استشارات مالية</option>`;
+                } else if (dropdown.id === 'lec-course') {
+                    dropdown.innerHTML = '<option value="">-- اختر الكورس --</option>';
+                    courses.forEach(c => {
+                        dropdown.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                    });
+                }
+                
+                dropdown.value = currentValue;
+            });
+        }
+
+        // Custom Notification System
+        function showNotification(msg) {
+            // Using innerHTML to support HTML formatting in messages
+            document.getElementById('notification-message').innerHTML = msg;
+            const modal = document.getElementById('notification-modal');
+            const content = document.getElementById('notification-content');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeNotification() {
+            const modal = document.getElementById('notification-modal');
+            const content = document.getElementById('notification-content');
+            
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        let confirmCallback = null;
+
+        function showConfirmationModal(title, message, onConfirm) {
+            document.getElementById('confirmation-title').textContent = title;
+            document.getElementById('confirmation-message').innerHTML = message;
+            confirmCallback = onConfirm;
+
+            const modal = document.getElementById('confirmation-modal');
+            const content = document.getElementById('confirmation-content');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+
+            document.getElementById('confirm-delete-btn').onclick = () => {
+                if (typeof confirmCallback === 'function') {
+                    confirmCallback();
+                }
+                closeConfirmationModal();
+            };
+        }
+
+        function closeConfirmationModal() {
+            const modal = document.getElementById('confirmation-modal');
+            const content = document.getElementById('confirmation-content');
+            
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                confirmCallback = null;
+            }, 200);
+        }
+    </script>
+</body>
+</html>
