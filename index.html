@@ -260,7 +260,7 @@
                         
                         <!-- Service Selection First -->
                          <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <label class="block text-sm font-bold text-gray-800 mb-2">نوع الخدمة <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">نوع كورس <span class="text-red-500">*</span></label>
                             <select id="service-type-select" onchange="toggleServiceFields()" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                                 <option value="course">كورسات محاسبة</option>
                                 <option value="consulting">استشارات مالية</option>
@@ -383,7 +383,7 @@
                                     <th class="p-4 border-b">الاسم</th>
                                     <th class="p-4 border-b">الدولة</th>
                                     <th class="p-4 border-b">الهاتف</th>
-                                    <th class="p-4 border-b">الخدمة</th>
+                                    <th class="p-4 border-b">كورس</th>
                                     <th class="p-4 border-b">الحالة</th>
                                     <th class="p-4 border-b text-center">إجراءات</th>
                                 </tr>
@@ -657,7 +657,7 @@
                                     <th class="p-4">الاسم</th>
                                     <th class="p-4">الكود / الشركة</th>
                                     <th class="p-4">الهاتف</th>
-                                    <th class="p-4">نوع الخدمة</th>
+                                    <th class="p-4">نوع كورس</th>
                                     <th class="p-4">الحالة</th>
                                     <th class="p-4">الدفع</th>
                                 </tr>
@@ -1112,7 +1112,7 @@
                 
                 // --- Auto Send WhatsApp ---
                 const formattedPhone = formatPhoneNumber(country, targetPhoneRaw);
-                const message = `مرحباً ${name}،\nشكراً لتسجيلك في أكاديمية AWC.\nتم تسجيل بياناتك بنجاح.\n\nالخدمة: ${serviceName}\nكود التسجيل: ${code}\n\nسنتواصل معك قريباً لتأكيد التفاصيل.`;
+                const message = `مرحباً ${name}،\nشكراً لتسجيلك في أكاديمية AWC.\nتم تسجيل بياناتك بنجاح.\n\nكورس: ${serviceName}\nكود التسجيل: ${code}\n\nسنتواصل معك قريباً لتأكيد التفاصيل.`;
                 
                 openWhatsApp(formattedPhone, message);
                 // --------------------------
@@ -1573,4 +1573,5 @@
 
     </script>
 </body>
+
 </html>
