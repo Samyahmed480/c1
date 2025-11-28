@@ -147,6 +147,8 @@
                             <div id="field-course-select" class="md:col-span-2"><label class="block text-sm font-bold mb-2 text-gray-700">اختر الكورس</label><select id="reg-service" onchange="updatePriceField()" class="w-full p-3 border rounded-lg border-gray-300 bg-white outline-none"><option value="">-- اختر --</option></select></div>
                             <div id="field-price-display" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">قيمة الاشتراك (EGP)</label><input type="text" id="reg-price-display" readonly class="w-full p-3 border rounded-lg bg-gray-100 text-gray-700 font-bold border-gray-300"></div>
                             <div id="field-company-name" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">اسم الشركة</label><input type="text" id="reg-company" class="w-full p-3 border rounded-lg border-gray-300 outline-none"></div>
+                            <div id="field-consulting-price" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">قيمة الاستشارة (EGP)</label><input type="number" id="reg-consulting-price" placeholder="0.00" class="w-full p-3 border rounded-lg border-gray-300 outline-none"></div>
+                            <div id="field-consulting-details" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">التفاصيل</label><textarea id="reg-consulting-details" class="w-full p-3 border rounded-lg border-gray-300 outline-none" rows="3"></textarea></div>
 
                             <div class="md:col-span-2 bg-gray-50 p-5 rounded-lg border border-gray-200 mt-2">
                                 <h4 class="font-bold text-sm text-gray-700 mb-3 border-b pb-2">بيانات الدفع</h4>
@@ -203,35 +205,36 @@
 
             <!-- 5. Lectures (Schedule Builder + Jitsi Integration) -->
             <div id="view-lectures" class="view-section fade-in hidden">
-                <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
-                    <h2 class="text-xl font-bold mb-4 text-primary">إنشاء جدول المحاضرات</h2>
-                    <form onsubmit="handleAddLecture(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
-                        <input type="text" id="lec-title" placeholder="عنوان المحاضرة" required class="p-3 border rounded md:col-span-2 bg-white">
-                        <select id="lec-course" required class="p-3 border rounded bg-white"><option value="">اختر الكورس</option></select>
-                        <select id="lec-instructor-select" required class="p-3 border rounded bg-white"><option value="">اختر المحاضر</option></select>
-                        <input type="date" id="lec-date" required class="p-3 border rounded bg-white">
-                        <input type="time" id="lec-time" required class="p-3 border rounded bg-white">
-                        
-                        <div class="md:col-span-2 flex items-center gap-2">
-                            <input type="url" id="lec-link" placeholder="رابط الاجتماع (Zoom / Google Meet / Jitsi)" class="flex-1 p-3 border rounded bg-white" dir="ltr">
-                            <button type="button" onclick="generateJitsiLink()" class="btn-jitsi px-4 py-3 rounded font-bold whitespace-nowrap shadow-md">
-                                <i class="fas fa-video mr-1"></i> إنشاء رابط Jitsi
-                            </button>
-                        </div>
-
-                        <div class="md:col-span-2"><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="lec-notify" class="w-4 h-4"> <span class="text-sm">إرسال تذكير واتساب للمشتركين</span></label></div>
-                        <button type="submit" class="bg-green-600 text-white font-bold py-3 rounded md:col-span-2 shadow hover:bg-green-700">إضافة للجدول</button>
-                    </form>
-                </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <div class="flex border-b mb-4">
-                        <button id="tab-add-lecture" onclick="switchLectureTab('add')" class="px-4 py-2 text-gray-500">إضافة</button>
-                        <button id="tab-upcoming-lectures" onclick="switchLectureTab('upcoming')" class="px-4 py-2 text-blue-600 border-b-2 border-blue-600">الجدول القادم</button>
-                        <button id="tab-recorded-lectures" onclick="switchLectureTab('recorded')" class="px-4 py-2 text-gray-500">الأرشيف</button>
+                    <div class="flex justify-between items-center border-b mb-4 pb-3">
+                        <div>
+                            <button id="tab-btn-upcoming" onclick="switchLectureTab('upcoming')" class="px-4 py-2 text-blue-600 border-b-2 border-blue-600 font-semibold">الجدول القادم</button>
+                            <button id="tab-btn-recorded" onclick="switchLectureTab('recorded')" class="px-4 py-2 text-gray-500 font-semibold">الأرشيف</button>
+                        </div>
+                        <button id="tab-btn-add" onclick="switchLectureTab('add')" class="px-4 py-2 text-gray-500 font-semibold flex items-center gap-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                            <i class="fas fa-plus-circle text-primary"></i> إضافة محاضرة
+                        </button>
                     </div>
-                    <div id="lecture-tab-add" class="hidden"></div> 
-                    <div id="lecture-tab-upcoming"><div id="upcoming-lectures-container" class="grid gap-3"></div></div>
-                    <div id="lecture-tab-recorded" class="hidden"><div id="recorded-lectures-container" class="grid gap-3"></div></div>
+
+                    <div id="lecture-tab-add" class="hidden p-4 bg-gray-50 rounded-lg border mb-4 fade-in">
+                        <h3 class="font-bold text-lg mb-4 text-primary">إضافة محاضرة جديدة</h3>
+                        <form onsubmit="handleAddLecture(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="lec-title" placeholder="عنوان المحاضرة" required class="p-3 border rounded md:col-span-2 bg-white">
+                            <select id="lec-course" required class="p-3 border rounded bg-white"><option value="">اختر الكورس</option></select>
+                            <select id="lec-instructor-select" required class="p-3 border rounded bg-white"><option value="">اختر المحاضر</option></select>
+                            <input type="date" id="lec-date" required class="p-3 border rounded bg-white">
+                            <input type="time" id="lec-time" required class="p-3 border rounded bg-white">
+                            <div class="md:col-span-2 flex items-center gap-2">
+                                <input type="url" id="lec-link" placeholder="رابط الاجتماع (Zoom / Google Meet / Jitsi)" class="flex-1 p-3 border rounded bg-white" dir="ltr">
+                                <button type="button" onclick="generateJitsiLink()" class="btn-jitsi px-4 py-3 rounded font-bold whitespace-nowrap shadow-md"><i class="fas fa-video mr-1"></i> إنشاء رابط Jitsi</button>
+                            </div>
+                            <div class="md:col-span-2"><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="lec-notify" class="w-4 h-4"> <span class="text-sm">إرسال تذكير واتساب للمشتركين</span></label></div>
+                            <button type="submit" class="bg-green-600 text-white font-bold py-3 rounded md:col-span-2 shadow hover:bg-green-700">إضافة للجدول</button>
+                        </form>
+                    </div>
+                    
+                    <div id="lecture-tab-upcoming" class="fade-in"><div id="upcoming-lectures-container" class="grid gap-3"></div></div>
+                    <div id="lecture-tab-recorded" class="hidden fade-in"><div id="recorded-lectures-container" class="grid gap-3"></div></div>
                 </div>
             </div>
 
@@ -241,43 +244,52 @@
                     <h2 class="text-xl font-bold mb-6 text-primary">التقارير والإحصائيات</h2>
                     
                     <!-- Summary Cards -->
-                    <div class="grid grid-cols-3 gap-4 mb-8 text-center">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
                         <div class="bg-blue-50 p-4 rounded border border-blue-100">
-                            <h3 class="text-gray-500 text-sm mb-1">الطلاب</h3>
+                            <h3 class="text-gray-500 text-sm mb-1">إجمالي العملاء</h3>
                             <p id="report-total-students" class="text-3xl font-bold text-primary">0</p>
                         </div>
                         <div class="bg-green-50 p-4 rounded border border-green-100">
-                            <h3 class="text-gray-500 text-sm mb-1">الاستشارات</h3>
+                            <h3 class="text-gray-500 text-sm mb-1">عملاء الاستشارات</h3>
                             <p id="report-consulting-count" class="text-3xl font-bold text-green-600">0</p>
                         </div>
                         <div class="bg-yellow-50 p-4 rounded border border-yellow-100">
-                            <h3 class="text-gray-500 text-sm mb-1">الشهادات</h3>
+                            <h3 class="text-gray-500 text-sm mb-1">عملاء مكتملي السداد</h3>
                             <p id="report-certificates-count" class="text-3xl font-bold text-yellow-600">0</p>
                         </div>
                     </div>
 
                     <!-- Details Charts -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- Financial Report -->
+                        <div class="border p-4 rounded-lg lg:col-span-2">
+                            <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">التقرير المالي المفصل</h3>
+                            <div class="grid grid-cols-3 gap-4 text-center mb-4">
+                                <div class="bg-blue-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي الإيرادات</h4><p id="report-total-revenue" class="text-lg font-bold text-primary">0 EGP</p></div>
+                                <div class="bg-green-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي المحصل</h4><p id="report-total-collected" class="text-lg font-bold text-green-600">0 EGP</p></div>
+                                <div class="bg-red-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي المتبقي</h4><p id="report-total-due" class="text-lg font-bold text-red-600">0 EGP</p></div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4 mb-6"><div id="report-revenue-progress" class="bg-green-500 h-4 rounded-full text-center text-white text-xs font-bold" style="width: 0%"></div></div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-600 mb-2">تفصيل حسب حالة السداد:</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>مدفوع بالكامل</span><span id="report-fully-paid-count" class="font-bold bg-green-200 text-green-800 px-2 rounded-full">0</span></div>
+                                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>مدفوع جزئياً</span><span id="report-partially-paid-count" class="font-bold bg-yellow-200 text-yellow-800 px-2 rounded-full">0</span></div>
+                                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>غير مدفوع</span><span id="report-unpaid-count" class="font-bold bg-red-200 text-red-800 px-2 rounded-full">0</span></div>
+                                </div>
+                            </div>
+                        </div>
                         <!-- Sources Report -->
                         <div class="border p-4 rounded-lg">
                             <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">مصادر التسجيل</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between text-sm"><span class="text-gray-600">الموقع الإلكتروني</span><div class="w-2/3 bg-gray-100 rounded h-2"><div class="bg-blue-500 h-2 rounded" style="width: 40%"></div></div></div>
-                                <div class="flex justify-between text-sm"><span class="text-gray-600">سوشيال ميديا</span><div class="w-2/3 bg-gray-100 rounded h-2"><div class="bg-purple-500 h-2 rounded" style="width: 35%"></div></div></div>
-                                <div class="flex justify-between text-sm"><span class="text-gray-600">ترشيح صديق</span><div class="w-2/3 bg-gray-100 rounded h-2"><div class="bg-green-500 h-2 rounded" style="width: 25%"></div></div></div>
-                            </div>
-                        </div>
-                        <!-- Financial Report -->
-                        <div class="border p-4 rounded-lg">
-                            <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">الوضع المالي</h3>
-                            <div class="flex items-center justify-center h-32 gap-6">
-                                <div class="text-center"><p class="text-xs text-gray-400">المدفوع</p><p class="text-xl font-bold text-green-600">65%</p></div>
-                                <div class="text-center"><p class="text-xs text-gray-400">المتبقي</p><p class="text-xl font-bold text-red-500">35%</p></div>
+                            <div id="sources-report-container" class="space-y-3">
+                                <!-- Dynamic content will be injected here -->
                             </div>
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto"><table class="w-full text-right"><thead class="bg-gray-50"><tr><th class="p-3">الاسم</th><th class="p-3">الخدمة</th><th class="p-3">الحالة</th></tr></thead><tbody id="trainees-table-body"></tbody></table></div>
+                    <h3 class="font-bold text-gray-700 mb-2">أحدث المسجلين</h3>
+                    <div class="overflow-x-auto border rounded-lg"><table class="w-full text-right"><thead class="bg-gray-50"><tr><th class="p-3">الاسم</th><th class="p-3">الخدمة</th><th class="p-3">الحالة</th></tr></thead><tbody id="trainees-table-body"></tbody></table></div>
                 </div>
             </div>
 
@@ -310,82 +322,179 @@
             </div>
 
             <!-- 9. Users View -->
-            <div id="view-users" class="view-section fade-in hidden"><div class="bg-white p-6 rounded-xl shadow-sm"><h2 class="font-bold mb-4">المستخدمين</h2><form id="addUserForm" onsubmit="handleAddNewUser(event)" class="flex gap-2"><input type="email" id="new-user-email" placeholder="بريد" class="border p-2 flex-1"><input type="password" id="new-user-password" placeholder="كلمة مرور" class="border p-2 flex-1"><button class="bg-primary text-white px-4 rounded">إضافة</button></form></div></div>
+            <div id="view-users" class="view-section fade-in hidden">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4 text-primary">إدارة المستخدمين والصلاحيات</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Add User Form -->
+                        <div class="md:col-span-1 bg-gray-50 p-4 rounded-lg border">
+                            <h3 class="font-bold mb-3 text-gray-700">إضافة مستخدم جديد</h3>
+                            <form id="addUserForm" onsubmit="handleAddNewUser(event)" class="space-y-4">
+                                <input type="email" id="new-user-email" placeholder="البريد الإلكتروني للمستخدم" class="w-full p-2 border rounded" required>
+                                <input type="password" id="new-user-password" placeholder="كلمة مرور مؤقتة" class="w-full p-2 border rounded" required>
+                                <select id="new-user-role" class="w-full p-2 border rounded bg-white" required>
+                                    <option value="assistant">مساعد (Assistant)</option>
+                                    <option value="admin">مدير (Admin)</option>
+                                </select>
+                                <button type="submit" class="w-full bg-primary text-white px-4 py-2 rounded font-bold">إضافة مستخدم</button>
+                            </form>
+                        </div>
+
+                        <!-- Users List -->
+                        <div class="md:col-span-2">
+                            <div class="overflow-x-auto border rounded-lg">
+                                <table class="w-full text-right">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="p-3 text-sm font-semibold">البريد الإلكتروني</th>
+                                            <th class="p-3 text-sm font-semibold">الصلاحية</th>
+                                            <th class="p-3 text-sm font-semibold">إجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
     <!-- TRAINEE PORTAL (UPDATED + PROTECTED) -->
-    <main id="trainee-app" class="flex flex-col min-h-screen hidden bg-gray-50 protected-content" oncontextmenu="return false;">
-        <header class="bg-primary text-white p-4 shadow-md">
+    <main id="trainee-app" class="flex flex-col min-h-screen hidden bg-gray-100 protected-content" oncontextmenu="return false;">
+        <header class="bg-primary text-white p-4 shadow-md sticky top-0 z-20">
             <div class="container mx-auto flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-user-graduate text-2xl"></i>
                     <div><h1 class="font-bold text-lg">بوابة الطالب</h1><p class="text-xs text-blue-200" id="trainee-header-name">...</p></div>
                 </div>
-                <button onclick="handleLogout()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded text-sm transition">تسجيل خروج</button>
+                <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition font-bold flex items-center gap-2"><i class="fas fa-sign-out-alt"></i> خروج</button>
             </div>
         </header>
         
-        <div class="container mx-auto p-4 md:p-8 space-y-6">
-            <!-- Courses List -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2"><i class="fas fa-book-open text-blue-600 ml-2"></i> دوراتي التدريبية</h2>
-                <div id="trainee-courses-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </div>
-
-            <!-- Selected Course Details -->
-            <div id="trainee-course-details" class="hidden space-y-6">
+        <div class="container mx-auto p-4 md:p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 
-                <!-- Recorded Course Credentials (NEW) -->
-                <div id="trainee-credentials-card" class="hidden bg-yellow-50 border border-yellow-200 p-4 rounded-lg flex items-start gap-3">
-                    <div class="text-yellow-600 text-xl mt-1"><i class="fas fa-key"></i></div>
-                    <div>
-                        <h4 class="font-bold text-yellow-800">بيانات دخول المنصة</h4>
-                        <p class="text-sm text-yellow-700">يمكنك الدخول للمحاضرات المسجلة باستخدام:</p>
-                        <div class="mt-2 bg-white p-2 rounded border border-yellow-100 text-sm font-mono text-gray-600">
-                            User: <span id="cred-user" class="font-bold text-black">...</span><br>
-                            Pass: <span id="cred-pass" class="font-bold text-black">...</span>
+                <!-- Sidebar / Profile -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Profile Card -->
+                    <div class="bg-white rounded-xl shadow-sm border p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-full bg-blue-100 text-primary flex items-center justify-center text-3xl"><i class="fas fa-user"></i></div>
+                            <div>
+                                <h3 id="trainee-profile-name" class="font-bold text-lg">...</h3>
+                                <p id="trainee-profile-code" class="text-sm text-gray-500 font-mono">...</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-xs space-y-2 border-t pt-3">
+                            <p><i class="fas fa-envelope text-gray-400 w-4 mr-2"></i> <span id="trainee-profile-email">...</span></p>
+                            <p><i class="fas fa-phone text-gray-400 w-4 mr-2"></i> <span id="trainee-profile-phone">...</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Courses List -->
+                    <div class="bg-white rounded-xl shadow-sm border p-4">
+                        <h2 class="font-bold text-gray-800 mb-3 border-b pb-2">دوراتي التدريبية</h2>
+                        <div id="trainee-courses-list" class="space-y-2">
+                            <!-- Course items will be injected here -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Financials -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
-                        <h3 class="font-bold text-lg text-gray-800"><i class="fas fa-wallet text-green-600 ml-2"></i> الحالة المالية</h3>
-                        <span id="trainee-detail-course-name" class="text-sm text-primary font-bold bg-blue-50 px-3 py-1 rounded-full"></span>
+                <!-- Main Content -->
+                <div class="lg:col-span-3">
+                    <div id="trainee-course-details" class="hidden space-y-6">
+                        <!-- Recorded Course Credentials (NEW) -->
+                        <div id="trainee-credentials-card" class="hidden bg-yellow-50 border border-yellow-200 p-4 rounded-lg flex items-start gap-3">
+                            <div class="text-yellow-600 text-xl mt-1"><i class="fas fa-key"></i></div>
+                            <div>
+                                <h4 class="font-bold text-yellow-800">بيانات دخول المنصة</h4>
+                                <p class="text-sm text-yellow-700">يمكنك الدخول للمحاضرات المسجلة باستخدام:</p>
+                                <div class="mt-2 bg-white p-2 rounded border border-yellow-100 text-sm font-mono text-gray-600">
+                                    User: <span id="cred-user" class="font-bold text-black">...</span><br>
+                                    Pass: <span id="cred-pass" class="font-bold text-black">...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Financials -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                                <h3 class="font-bold text-lg text-gray-800"><i class="fas fa-wallet text-green-600 ml-2"></i> الحالة المالية</h3>
+                                <span id="trainee-detail-course-name" class="text-sm text-primary font-bold bg-blue-50 px-3 py-1 rounded-full"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div><p class="text-xs text-gray-500">الإجمالي</p><p class="font-bold" id="trainee-portal-total">0</p></div>
+                                <div><p class="text-xs text-gray-500">المدفوع</p><p class="font-bold text-green-600" id="trainee-portal-paid">0</p></div>
+                                <div><p class="text-xs text-gray-500">المتبقي</p><p class="font-bold text-red-600" id="trainee-portal-remain">0</p></div>
+                            </div>
+                            <div class="mt-4 w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" id="trainee-portal-progress" style="width: 0%"></div></div>
+                        </div>
+                        <!-- Course Schedule Table -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2"><i class="fas fa-calendar-alt text-purple-600 ml-2"></i> جدول محاضرات الكورس</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="p-3 text-sm font-semibold">المحاضرة</th>
+                                            <th class="p-3 text-sm font-semibold">التاريخ</th>
+                                            <th class="p-3 text-sm font-semibold">الوقت</th>
+                                            <th class="p-3 text-sm font-semibold">الحالة</th>
+                                            <th class="p-3 text-sm font-semibold text-left">إجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="trainee-schedule-tbody">
+                                        <!-- Schedule rows will be injected here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Certificate -->
+                        <div id="trainee-cert-section" class="hidden bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center border-green-100 bg-green-50">
+                            <div><h3 class="font-bold text-green-800">شهادة التخرج</h3><p class="text-sm text-green-600">مبارك! لقد أتممت الكورس بنجاح.</p></div>
+                            <button onclick="window.print()" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700">تحميل الشهادة</button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div><p class="text-xs text-gray-500">الإجمالي</p><p class="font-bold" id="trainee-portal-total">0</p></div>
-                        <div><p class="text-xs text-gray-500">المدفوع</p><p class="font-bold text-green-600" id="trainee-portal-paid">0</p></div>
-                        <div><p class="text-xs text-gray-500">المتبقي</p><p class="font-bold text-red-600" id="trainee-portal-remain">0</p></div>
+                    <div id="trainee-no-course-selected" class="flex items-center justify-center h-full bg-white rounded-xl border min-h-[400px]">
+                        <div class="text-center text-gray-500 p-8">
+                            <i class="fas fa-graduation-cap text-5xl mb-4 text-primary"></i>
+                            <h2 class="text-2xl font-bold text-gray-800">أهلاً بك في بوابتك التعليمية!</h2>
+                            <p class="mt-2">أنت مسجل في <span id="trainee-welcome-courses-count" class="font-bold text-primary">0</span> دورات.</p>
+                            <p class="mt-4 text-gray-400">الرجاء اختيار دورة من القائمة الجانبية لبدء رحلتك التعليمية وعرض التفاصيل.</p>
+                        </div>
                     </div>
-                    <div class="mt-4 w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" id="trainee-portal-progress" style="width: 0%"></div></div>
-                </div>
-
-                <!-- Lectures -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">المحاضرات القادمة</h3>
-                        <div id="trainee-upcoming-container" class="space-y-3"></div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">الأرشيف</h3>
-                        <div id="trainee-recorded-container" class="space-y-3"></div>
-                    </div>
-                </div>
-                
-                <!-- Certificate -->
-                <div id="trainee-cert-section" class="hidden bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center border-green-100 bg-green-50">
-                    <div><h3 class="font-bold text-green-800">شهادة التخرج</h3><p class="text-sm text-green-600">مبارك! لقد أتممت الكورس بنجاح.</p></div>
-                    <button onclick="window.print()" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700">تحميل الشهادة</button>
                 </div>
             </div>
         </div>
     </main>
 
     <!-- Modals -->
-    <div id="notification-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-black/50"><div class="bg-white p-6 rounded-lg w-80 text-center shadow-xl"><h3 class="font-bold text-lg mb-2">تنبيه</h3><p id="notification-message" class="text-gray-600 mb-4">...</p><button onclick="closeNotification()" class="bg-primary text-white px-6 py-2 rounded">حسناً</button></div></div>
+    <!-- Jitsi Meet Modal -->
+    <div id="jitsi-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full h-full max-w-6xl flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
+                <h3 id="jitsi-modal-title" class="font-bold text-lg text-primary">...</h3>
+                <button onclick="closeJitsiMeeting()" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            <div id="jitsi-container" class="flex-1 bg-gray-900 w-full h-full">
+                <!-- Jitsi will be embedded here -->
+            </div>
+        </div>
+    </div>
+    <div id="trainee-details-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" onclick="closeTraineeDetailsModal()">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="sticky top-0 bg-white p-4 border-b flex justify-between items-center z-10">
+                <h3 class="font-bold text-lg text-primary">تفاصيل العميل</h3>
+                <button onclick="closeTraineeDetailsModal()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            <div id="trainee-details-content" class="p-6">
+                <!-- Details will be injected here -->
+            </div>
+        </div>
+    </div>
+    <div id="notification-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-black/50"><div class="bg-white p-6 rounded-lg w-80 text-center shadow-xl"><h3 id="notification-title" class="font-bold text-lg mb-2">تنبيه</h3><p id="notification-message" class="text-gray-600 mb-4">...</p><button onclick="closeNotification()" class="bg-primary text-white px-6 py-2 rounded">حسناً</button></div></div>
 
     <script>
         // === FIREBASE CONFIG ===
@@ -406,8 +515,180 @@
             if(el) el.value = link;
         }
 
+        let jitsiApi = null;
+        function startJitsiMeeting(roomName, lectureTitle) {
+            const domain = 'meet.jit.si';
+            const options = {
+                roomName: roomName, width: '100%', height: '100%',
+                parentNode: document.querySelector('#jitsi-container'),
+                userInfo: { displayName: 'Admin' },
+                configOverwrite: { prejoinPageEnabled: false, startWithAudioMuted: true, startWithVideoMuted: true },
+                interfaceConfigOverwrite: {
+                    SHOW_JITSI_WATERMARK: false, SHOW_WATERMARK_FOR_GUESTS: false,
+                    TOOLBAR_BUTTONS: [ 'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection', 'hangup', 'profile', 'chat', 'recording', 'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand', 'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts', 'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone', 'security' ],
+                }
+            };
+            jitsiApi = new JitsiMeetExternalAPI(domain, options);
+            setText('jitsi-modal-title', lectureTitle);
+            const modal = document.getElementById('jitsi-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            jitsiApi.addEventListener('videoConferenceLeft', () => { closeJitsiMeeting(); });
+        }
+
+        function joinJitsiMeetingAsTrainee(roomName, lectureTitle) {
+            const domain = 'meet.jit.si';
+            const traineeName = currentTrainee ? currentTrainee.name : 'Student';
+            const options = {
+                roomName: roomName, width: '100%', height: '100%',
+                parentNode: document.querySelector('#jitsi-container'),
+                userInfo: { displayName: traineeName },
+                configOverwrite: { prejoinPageEnabled: true, startWithAudioMuted: true, startWithVideoMuted: true },
+                interfaceConfigOverwrite: {
+                    SHOW_JITSI_WATERMARK: false, SHOW_WATERMARK_FOR_GUESTS: false,
+                    TOOLBAR_BUTTONS: [ 'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection', 'hangup', 'profile', 'chat', 'raisehand', 'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts', 'tileview', 'videobackgroundblur', 'help' ],
+                    SETTINGS_SECTIONS: [ 'devices', 'language', 'moderator', 'profile', 'sounds' ],
+                    SHOW_CHROME_EXTENSION_BANNER: false
+                }
+            };
+            jitsiApi = new JitsiMeetExternalAPI(domain, options);
+            setText('jitsi-modal-title', lectureTitle);
+            const modal = document.getElementById('jitsi-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            jitsiApi.addEventListener('videoConferenceLeft', () => { closeJitsiMeeting(); });
+        }
+
+        function closeJitsiMeeting() {
+            if (jitsiApi) {
+                jitsiApi.dispose();
+                jitsiApi = null;
+            }
+            const modal = document.getElementById('jitsi-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            setHTML('jitsi-container', '');
+        }
+
+        // === LECTURE NOTIFICATIONS (CLIENT-SIDE SCHEDULER) ===
+        const NOTIFICATION_WINDOW_MINUTES = 15; // Send notification if lecture is within 15 mins
+
+        function startNotificationScheduler() {
+            // This function checks for upcoming lectures every minute.
+            // IMPORTANT: This only works if this browser tab is open. For a reliable solution, a server-side function (like Firebase Cloud Functions) is recommended.
+            console.log("Notification scheduler started. Checking every minute.");
+            setInterval(async () => {
+                const now = new Date();
+                // Find lectures that are upcoming, require notification, and haven't had one sent yet.
+                const lecturesToNotify = lectures.filter(l => 
+                    l.status === 'upcoming' && 
+                    l.notify === true && 
+                    !l.notificationSent
+                );
+
+                for (const lecture of lecturesToNotify) {
+                    const lectureTime = new Date(`${lecture.date}T${lecture.time}`);
+                    const timeDiffMinutes = (lectureTime - now) / (1000 * 60);
+
+                    // Check if the lecture is within the notification window
+                    if (timeDiffMinutes > 0 && timeDiffMinutes <= NOTIFICATION_WINDOW_MINUTES) {
+                        await triggerLectureNotification(lecture);
+                    }
+                }
+            }, 60000); // Run every 60 seconds
+        }
+
+        async function triggerLectureNotification(lecture) {
+            const students = trainees.filter(t => t.service === lecture.courseName && t.status === 'مفعل');
+            if (students.length === 0) {
+                await safeDb.collection('lectures').doc(lecture.id).update({ notificationSent: true });
+                return;
+            }
+            const message = `📢 *تذكير بمحاضرة* 📢\n\n*المحاضرة:* ${lecture.title}\n*الكورس:* ${lecture.courseName}\n\n*الموعد:* ستبدأ قريباً، اليوم الساعة ${lecture.time}\n\n*رابط الانضمام:*\n${lecture.link || 'سيتم توفير الرابط في بوابة الطالب'}`;
+            const doSend = confirm(`محاضرة "${lecture.title}" ستبدأ قريباً.\n\nهل تريد إرسال تذكير عبر واتساب لـ ${students.length} طالب الآن؟\n\n(سيتم فتح عدة نوافذ واتساب)`);
+            if (doSend) {
+                showNotification(`جاري إرسال ${students.length} تذكير...`);
+                students.forEach((student, index) => { setTimeout(() => { const phone = formatPhone(student.country, student.whatsapp || student.phone); openWhatsApp(phone, message); }, index * 500); });
+                await safeDb.collection('lectures').doc(lecture.id).update({ notificationSent: true });
+            }
+        }
+
+        function startArchivingScheduler() {
+            const ARCHIVE_DELAY_HOURS = 3; // أرشفة المحاضرة بعد 3 ساعات من بدايتها
+            console.log(`Archiving scheduler started. Checking every 5 minutes for lectures to archive.`);
+
+            setInterval(async () => {
+                const now = new Date();
+                const upcomingLectures = lectures.filter(l => l.status === 'upcoming');
+
+                for (const lecture of upcomingLectures) {
+                    if (!lecture.date || !lecture.time) continue; // تخطي المحاضرات بدون تاريخ أو وقت
+
+                    try {
+                        const lectureStartTime = new Date(`${lecture.date}T${lecture.time}`);
+                        const archiveTime = new Date(lectureStartTime.getTime() + ARCHIVE_DELAY_HOURS * 60 * 60 * 1000);
+
+                        if (now > archiveTime) {
+                            console.log(`Archiving lecture: ${lecture.title} (ID: ${lecture.id})`);
+                            await safeDb.collection('lectures').doc(lecture.id).update({ status: 'recorded' });
+                        }
+                    } catch (error) { console.error(`Error archiving lecture ${lecture.id}:`, error); }
+                }
+            }, 300000); // التشغيل كل 5 دقائق
+        }
+
+        // === PERMISSIONS & RBAC ===
+        async function fetchUserRole(user) {
+            if (!user) {
+                currentUserRole = null;
+                applyPermissions();
+                return;
+            }
+            const userDoc = await db.collection('system_users').doc(user.uid).get();
+            if (userDoc.exists) {
+                currentUserRole = userDoc.data().role;
+            } else {
+                // This might be the very first admin. Let's check if system_users is empty.
+                const usersSnapshot = await db.collection('system_users').limit(1).get();
+                if (usersSnapshot.empty) {
+                    // First user ever, make them an admin.
+                    await db.collection('system_users').doc(user.uid).set({
+                        email: user.email,
+                        role: 'admin',
+                        createdAt: new Date().toISOString()
+                    });
+                    currentUserRole = 'admin';
+                } else {
+                    // User exists in Auth but not in our roles collection. Deny access.
+                    currentUserRole = 'guest'; 
+                    showNotification('ليس لديك صلاحية الوصول للنظام. تواصل مع المدير.', 'error');
+                    handleLogout();
+                }
+            }
+            applyPermissions();
+        }
+
+        function applyPermissions() {
+            const isAdmin = currentUserRole === 'admin';
+            const elementsToToggle = ['nav-reports', 'nav-users', 'nav-instructors', 'nav-courses'];
+            
+            elementsToToggle.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = isAdmin ? 'flex' : 'none';
+                }
+            });
+
+            // If a non-admin is on a restricted view, redirect them.
+            const currentViewId = document.querySelector('.view-section:not(.hidden)')?.id.replace('view-', '');
+            const restrictedViews = ['reports', 'users', 'instructors', 'courses'];
+            if (!isAdmin && restrictedViews.includes(currentViewId)) {
+                showView('dashboard');
+            }
+        }
+
         // === STATE ===
-        let trainees=[], lectures=[], instructors=[], courses=[], currentTrainee=null, allTraineeEnrollments=[];
+        let trainees=[], lectures=[], instructors=[], courses=[], currentTrainee=null, allTraineeEnrollments=[], systemUsers=[], currentUserRole = null;
 
         // === INIT ===
         document.addEventListener('DOMContentLoaded', async () => {
@@ -416,11 +697,20 @@
 
             if(typeof __initial_auth_token!=='undefined'&&__initial_auth_token) try{await auth.signInWithCustomToken(__initial_auth_token);}catch(e){}
             
-            auth.onAuthStateChanged(u => {
+            auth.onAuthStateChanged(async u => {
                 if(u && !currentTrainee) {
-                    document.getElementById('login-screen').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden');
-                    showView('dashboard'); initListeners();
+                    await fetchUserRole(u); // Fetch role for the logged-in user
+                    if (currentUserRole && currentUserRole !== 'guest') {
+                        document.getElementById('login-screen').classList.add('hidden'); 
+                        document.getElementById('main-app').classList.remove('hidden');
+                        showView('dashboard'); 
+                        initListeners(); 
+                        startNotificationScheduler();
+                        startArchivingScheduler();
+                    }
                 } else if(!currentTrainee) {
+                    currentUserRole = null; // Clear role on logout
+                    applyPermissions();
                     document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('main-app').classList.add('hidden');
                 }
             });
@@ -431,17 +721,27 @@
             safeDb.collection('instructors').onSnapshot(s => { instructors=s.docs.map(d=>({id:d.id,...d.data()})); updateInstructorsUI(); });
             safeDb.collection('courses').onSnapshot(s => { courses=s.docs.map(d=>({id:d.id,...d.data()})); updateCoursesUI(); });
             safeDb.collection('lectures').orderBy('date','desc').onSnapshot(s => { lectures=s.docs.map(d=>({id:d.id,...d.data()})); updateLecturesUI(); });
-            safeDb.collection('trainees').orderBy('date','desc').onSnapshot(s => { trainees=s.docs.map(d=>({id:d.id,...d.data()})); updateTraineesUI(); updateTraineesManagementUI(); });
+            safeDb.collection('trainees').orderBy('date','desc').onSnapshot(s => { trainees=s.docs.map(d=>({id:d.id,...d.data()})); updateTraineesUI(); updateTraineesManagementUI(); updateReportsUI(); });
+            db.collection('system_users').onSnapshot(s => { systemUsers = s.docs.map(d => ({ id: d.id, ...d.data() })); updateUsersUI(); });
         }
 
         // === VIEWS ===
         function showView(id) {
+            // RBAC check
+            const restrictedViews = ['reports', 'users', 'instructors', 'courses'];
+            if (currentUserRole !== 'admin' && restrictedViews.includes(id)) {
+                showNotification('ليس لديك الصلاحية للوصول لهذه الصفحة.', 'error');
+                id = 'dashboard'; // Redirect to dashboard
+            }
+
             document.querySelectorAll('.view-section').forEach(e=>e.classList.add('hidden'));
             const v=document.getElementById('view-'+id); if(v) { v.classList.remove('hidden'); v.classList.add('fade-in'); }
             const n=document.getElementById('nav-'+id); 
             if(n) { document.querySelectorAll('.sidebar-link').forEach(e=>e.classList.remove('active')); n.classList.add('active'); }
             if(id==='lectures') switchLectureTab('upcoming');
             if(id==='trainees') updateTraineesManagementUI();
+            if(id==='reports') updateReportsUI();
+            if(id==='users') updateUsersUI();
             setText('page-title', {'dashboard':'لوحة التحكم','register':'تسجيل متدرب','attendance':'تفعيل الحضور','trainees':'إدارة المتدربين','certificates':'الشهادات','lectures':'المحاضرات','instructors':'المدربين','courses':'الكورسات','reports':'التقارير','users':'المستخدمين'}[id]||'AWC System');
         }
         function toggleLoginType(t) {
@@ -452,7 +752,7 @@
 
         // === AUTH & TRAINEE PORTAL ===
         async function handleLogin(e) { e.preventDefault(); try{ await auth.signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value); }catch(err){ showNotification('خطأ في الدخول','error'); } }
-        async function demoLogin() { try{ await auth.signInAnonymously(); }catch(e){} }
+        async function demoLogin() { try{ await auth.signInWithEmailAndPassword('admin@awc.com', '123456'); }catch(e){ showNotification('حساب تجريبي غير متاح.','error'); } }
         async function handleLogout() { try{ await auth.signOut(); }catch(e){} window.location.reload(); }
         
         function handleTraineeLogin(e) {
@@ -474,26 +774,39 @@
 
         function loadTraineePortal(enrollments) {
             const studentName = enrollments[0].name;
+            const studentCode = enrollments[0].code;
+            const studentEmail = enrollments[0].email || 'غير مسجل';
+            const studentPhone = enrollments[0].phone;
+
             setText('trainee-header-name', studentName);
+            setText('trainee-profile-name', studentName);
+            setText('trainee-profile-code', studentCode);
+            setText('trainee-profile-email', studentEmail);
+            setText('trainee-profile-phone', studentPhone);
+
             const container = document.getElementById('trainee-courses-list');
             if(container) {
                 container.innerHTML = enrollments.map((en, index) => `
-                    <div onclick="selectTraineeCourse('${en.id}')" id="course-card-${en.id}" class="course-card bg-white p-4 rounded-lg border cursor-pointer hover:shadow-md transition relative overflow-hidden">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary font-bold text-lg">${index+1}</div>
-                            <div><h4 class="font-bold text-gray-800">${en.service}</h4><p class="text-xs text-gray-500">${en.serviceType==='recorded'?'مسجل (أونلاين)':'تفاعلي'}</p></div>
-                        </div>
-                        <div class="absolute top-2 left-2"><span class="text-xs px-2 py-1 rounded ${en.payment.status==='مدفوع بالكامل'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}">${en.payment.status}</span></div>
+                    <div onclick="selectTraineeCourse('${en.id}')" id="course-card-${en.id}" class="course-card p-3 rounded-lg border cursor-pointer hover:bg-gray-50 hover:border-blue-300 transition">
+                        <h4 class="font-bold text-sm text-gray-800">${en.service}</h4>
+                        <p class="text-xs text-gray-500">${en.serviceType==='recorded'?'مسجل (أونلاين)':'تفاعلي'}</p>
                     </div>`).join('');
             }
-            if(currentTrainee) selectTraineeCourse(currentTrainee.id);
+            
+            // عرض شاشة الترحيب بدلاً من تحديد دورة تلقائياً
+            document.getElementById('trainee-no-course-selected').classList.remove('hidden');
+            document.getElementById('trainee-course-details').classList.add('hidden');
+            setText('trainee-welcome-courses-count', enrollments.length);
         }
 
         function selectTraineeCourse(id) {
             const s = allTraineeEnrollments.find(t => t.id === id);
             if(!s) return;
-            document.querySelectorAll('.course-card').forEach(el => el.classList.remove('active'));
-            document.getElementById(`course-card-${id}`)?.classList.add('active');
+            document.querySelectorAll('.course-card').forEach(el => { el.classList.remove('bg-blue-50', 'border-blue-400'); });
+            const card = document.getElementById(`course-card-${id}`);
+            if(card) card.classList.add('bg-blue-50', 'border-blue-400');
+            
+            document.getElementById('trainee-no-course-selected').classList.add('hidden');
             document.getElementById('trainee-course-details').classList.remove('hidden');
 
             // Credentials for Recorded Courses
@@ -511,13 +824,40 @@
             const pct=tot>0?Math.min(100,(pd/tot)*100):0;
             const prog=document.getElementById('trainee-portal-progress'); if(prog) prog.style.width=pct+'%';
 
-            const myLecs = lectures.filter(l => l.courseName === s.service);
-            const renderL = l => `<div class="bg-white p-3 border rounded mb-2 flex justify-between items-center"><div><h5 class="font-bold text-sm">${l.title}</h5><span class="text-xs text-gray-500">${l.date} ${l.time}</span></div>
-                ${l.link?`<a href="${l.link}" target="_blank" class="text-white bg-blue-500 px-4 py-1 rounded-full text-xs shadow hover:bg-blue-600 flex items-center gap-1"><i class="fas fa-video"></i> انضمام</a>`:''}
-            </div>`;
+            const myLecs = lectures.filter(l => l.courseName === s.service).sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            setHTML('trainee-upcoming-container', myLecs.filter(l=>l.status==='upcoming').map(renderL).join('')||'<div class="text-center text-gray-400 text-sm py-4">لا توجد محاضرات قادمة</div>');
-            setHTML('trainee-recorded-container', myLecs.filter(l=>l.status==='recorded').map(renderL).join('')||'<div class="text-center text-gray-400 text-sm py-4">الأرشيف فارغ</div>');
+            const scheduleRows = myLecs.map(l => {
+                const roomName = l.link ? `'${l.link.split('/').pop()}'` : null;
+                const lectureTitle = `'${l.title.replace(/'/g, "\\'")}'`;
+                
+                let actionButton = '';
+                let statusBadge = '';
+
+                if (l.status === 'upcoming') {
+                    statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">قادمة</span>`;
+                    if (l.link) {
+                        actionButton = `<button onclick="joinJitsiMeetingAsTrainee(${roomName}, ${lectureTitle})" class="text-white bg-blue-500 px-3 py-1 rounded text-xs shadow hover:bg-blue-600">انضمام</button>`;
+                    }
+                } else if (l.status === 'recorded') {
+                    statusBadge = `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">مسجلة</span>`;
+                    if (l.link) {
+                        actionButton = `<button onclick="joinJitsiMeetingAsTrainee(${roomName}, ${lectureTitle})" class="text-white bg-gray-500 px-3 py-1 rounded text-xs shadow hover:bg-gray-600">مشاهدة</button>`;
+                    }
+                }
+
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 font-bold text-sm">${l.title}</td>
+                        <td class="p-3 text-sm text-gray-600" dir="ltr">${l.date}</td>
+                        <td class="p-3 text-sm text-gray-600" dir="ltr">${l.time}</td>
+                        <td class="p-3">${statusBadge}</td>
+                        <td class="p-3 text-left">${actionButton}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const emptyRow = `<tr><td colspan="5" class="text-center p-6 text-gray-400">لا يوجد محاضرات مجدولة لهذا الكورس.</td></tr>`;
+            setHTML('trainee-schedule-tbody', myLecs.length > 0 ? scheduleRows : emptyRow);
             
             const cert = document.getElementById('trainee-cert-section');
             if(cert) {
@@ -528,12 +868,84 @@
             }
         }
 
+        function showTraineeDetails(id) {
+            const trainee = trainees.find(t => t.id === id);
+            if (!trainee) return;
+
+            const contentEl = document.getElementById('trainee-details-content');
+            
+            let serviceDetailsHtml = '';
+            if (trainee.serviceType === 'consulting') {
+                serviceDetailsHtml = `
+                    <div class="col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-100 mt-4">
+                        <h4 class="font-bold text-primary mb-2">بيانات الاستشارة</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                            <p><strong>الخدمة:</strong> ${trainee.service}</p>
+                            <p><strong>اسم الشركة:</strong> ${trainee.company || 'لم يحدد'}</p>
+                            <div class="col-span-1 sm:col-span-2">
+                                <p><strong>التفاصيل:</strong></p>
+                                <p class="whitespace-pre-wrap bg-white p-2 mt-1 rounded border text-sm">${trainee.consultingDetails || 'لا يوجد'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else { // course or recorded
+                serviceDetailsHtml = `
+                    <div class="col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-100 mt-4">
+                        <h4 class="font-bold text-primary mb-2">بيانات الكورس</h4>
+                        <p><strong>الكورس:</strong> ${trainee.service}</p>
+                        <p><strong>نوع الخدمة:</strong> ${trainee.serviceType === 'recorded' ? 'كورس مسجل' : 'كورس تفاعلي'}</p>
+                        ${trainee.serviceType === 'recorded' && trainee.platformUser ? `
+                            <div class="mt-2 bg-yellow-100 p-2 rounded text-sm border border-yellow-200">
+                                <p class="font-bold text-yellow-800">بيانات دخول المنصة:</p>
+                                <p><strong>يوزر:</strong> ${trainee.platformUser}</p>
+                                <p><strong>باسورد:</strong> ${trainee.platformPass}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            const detailsHtml = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <div><p class="text-gray-500">الاسم الكامل</p><p class="font-bold text-base">${trainee.name}</p></div>
+                    <div><p class="text-gray-500">الكود</p><p class="font-bold text-base font-mono">${trainee.code}</p></div>
+                    <div><p class="text-gray-500">رقم الهاتف</p><p class="font-bold" dir="ltr">${trainee.phone}</p></div>
+                    <div><p class="text-gray-500">رقم واتساب</p><p class="font-bold" dir="ltr">${trainee.whatsapp || trainee.phone}</p></div>
+                    <div class="sm:col-span-2"><p class="text-gray-500">البريد الإلكتروني</p><p class="font-bold" dir="ltr">${trainee.email || 'لم يسجل'}</p></div>
+                    <div class="sm:col-span-2"><p class="text-gray-500">العنوان</p><p class="font-bold">${trainee.address || 'لم يسجل'}</p></div>
+                    <div><p class="text-gray-500">الدولة</p><p class="font-bold">${trainee.country}</p></div>
+                    <div><p class="text-gray-500">المصدر</p><p class="font-bold">${trainee.source}</p></div>
+                    <div><p class="text-gray-500">تاريخ التسجيل</p><p class="font-bold">${new Date(trainee.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
+                    <div><p class="text-gray-500">الحالة</p><p class="font-bold px-2 py-1 rounded inline-block ${trainee.status==='مفعل'?'bg-green-100 text-green-800':'bg-gray-100 text-gray-800'}">${trainee.status}</p></div>
+                    
+                    ${serviceDetailsHtml}
+
+                    <div class="col-span-2 bg-gray-50 p-4 rounded-lg border mt-4">
+                        <h4 class="font-bold text-gray-700 mb-2">البيانات المالية</h4>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div><p class="text-xs text-gray-500">الإجمالي</p><p class="font-bold text-lg">${trainee.payment.total} EGP</p></div>
+                            <div><p class="text-xs text-gray-500">المدفوع</p><p class="font-bold text-lg text-green-600">${trainee.payment.paid} EGP</p></div>
+                            <div><p class="text-xs text-gray-500">حالة السداد</p><p class="font-bold text-base">${trainee.payment.status}</p></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            contentEl.innerHTML = detailsHtml;
+            document.getElementById('trainee-details-modal').classList.remove('hidden');
+        }
+
+        function closeTraineeDetailsModal() {
+            document.getElementById('trainee-details-modal').classList.add('hidden');
+        }
+
         // === DATA HANDLERS ===
         function toggleServiceFields() {
             const t = document.getElementById('service-type-select').value;
-            const crs = document.getElementById('field-course-select'), cmp = document.getElementById('field-company-name'), prc = document.getElementById('field-price-display'), hint = document.getElementById('recorded-hint');
-            if(t==='course' || t==='recorded'){ if(crs) crs.classList.remove('hidden'); if(cmp) cmp.classList.add('hidden'); if(prc) prc.classList.remove('hidden'); }
-            else { if(crs) crs.classList.add('hidden'); if(cmp) cmp.classList.remove('hidden'); if(prc) prc.classList.add('hidden'); }
+            const crs = document.getElementById('field-course-select'), cmp = document.getElementById('field-company-name'), prc = document.getElementById('field-price-display'), hint = document.getElementById('recorded-hint'), consultPrice = document.getElementById('field-consulting-price'), details = document.getElementById('field-consulting-details');
+            if(t==='course' || t==='recorded'){ if(crs) crs.classList.remove('hidden'); if(cmp) cmp.classList.add('hidden'); if(prc) prc.classList.remove('hidden'); if(consultPrice) consultPrice.classList.add('hidden'); if(details) details.classList.add('hidden'); }
+            else { if(crs) crs.classList.add('hidden'); if(cmp) cmp.classList.remove('hidden'); if(prc) prc.classList.add('hidden'); if(consultPrice) consultPrice.classList.remove('hidden'); if(details) details.classList.remove('hidden'); }
             if(t==='recorded') hint.classList.remove('hidden'); else hint.classList.add('hidden');
         }
         function updatePriceField() {
@@ -553,7 +965,12 @@
             const type=document.getElementById('service-type-select').value;
             const srv = type==='consulting' ? 'استشارة مالية' : document.getElementById('reg-service').value;
             const srvEl = document.getElementById('reg-service');
-            const price = (type!=='consulting' && srvEl.selectedIndex>=0) ? (parseFloat(srvEl.options[srvEl.selectedIndex].dataset.price)||0) : 0;
+            let price = 0;
+            if (type === 'consulting') {
+                price = parseFloat(document.getElementById('reg-consulting-price').value) || 0;
+            } else if (srvEl.selectedIndex >= 0) {
+                price = parseFloat(srvEl.options[srvEl.selectedIndex].dataset.price) || 0;
+            }
             const code = (type==='consulting'?'AWC-C-':'AWC-S-') + Math.floor(10000+Math.random()*90000);
             const isPaid = document.getElementById('reg-is-paid').checked;
             
@@ -564,24 +981,46 @@
                 await safeDb.collection('trainees').add({
                     name, country, phone, whatsapp: document.getElementById('reg-whatsapp').value||phone,
                     email: document.getElementById('reg-email').value, address: document.getElementById('reg-address').value,
-                    service: srv, serviceType: type, company: document.getElementById('reg-company').value, source: document.getElementById('reg-source').value,
+                    service: srv, serviceType: type, company: document.getElementById('reg-company').value, source: document.getElementById('reg-source').value, consultingDetails: document.getElementById('reg-consulting-details').value,
                     code, status: 'غير مفعل', payment: {total:price, paid:isPaid?price:0, status:isPaid?'مدفوع بالكامل':'غير مدفوع'}, 
                     platformUser: platUser, platformPass: platPass, date: new Date().toISOString()
                 });
                 
-                let msg = isPaid 
-                    ? `مرحباً ${name}\nتم تأكيد اشتراكك في ${srv}\nالكود: ${code}\n${type==='recorded'?`بيانات الدخول:\nUser: ${platUser}\nPass: ${platPass}\nلا تشاركها مع أحد!`:''}`
-                    : `مرحباً ${name}\nتم تسجيلك مبدئياً في ${srv}.\nيرجى سداد الرسوم لتفعيل الحساب.\nالكود: ${code}`;
+                let msg = '';
+                if (type === 'consulting') {
+                    msg = `مرحباً ${name}،\nتم تسجيل طلب الاستشارة المالية الخاص بكم بنجاح.\n\nكود العميل: ${code}\n\nسيتم التواصل معكم قريباً من خلال فريقنا لتحديد الموعد ومناقشة التفاصيل.\n\nشكراً لاختياركم AWC System.`;
+                } else { // course or recorded
+                    if (isPaid) {
+                        msg = `مرحباً ${name}،\nتم تأكيد اشتراكك في "${srv}" بنجاح!\n\nالكود الخاص بك هو: ${code}\n\n${type === 'recorded' ? `يمكنك الآن الدخول إلى منصة المحاضرات المسجلة بالبيانات التالية:\nUser: ${platUser}\nPass: ${platPass}\n\n(يرجى عدم مشاركة هذه البيانات)` : 'سيتم إضافتك لمجموعات الواتساب الخاصة بالكورس.'}\n\nبالتوفيق!`;
+                    } else {
+                        msg = `مرحباً ${name}،\nتم تسجيلك مبدئياً في كورس "${srv}".\n\nالكود الخاص بك هو: ${code}\n\nيرجى إتمام عملية سداد الرسوم لتفعيل اشتراكك واستلام بيانات الدخول.\n\nشكراً لك.`;
+                    }
+                }
 
                 openWhatsApp(formatPhone(country, phone), msg);
-                showNotification('تم الحفظ','success'); e.target.reset(); document.getElementById('reg-receipt-container').classList.add('hidden');
-            } catch(err) { console.error(err); showNotification('حدث خطأ','error'); }
+                showNotification('تم الحفظ بنجاح', 'success', 'نجاح'); 
+                e.target.reset(); document.getElementById('reg-receipt-container').classList.add('hidden');
+            } catch(err) { console.error(err); showNotification('حدث خطأ أثناء الحفظ', 'error', 'خطأ'); }
         }
 
         // === SEED DATA ===
         async function seedDatabase() {
             // Instructors
-            const i1 = await safeDb.collection('instructors').add({name: "أحمد علي", spec: "محاسبة", email: "ahmed@awc.com"});
+            try {
+                await auth.createUserWithEmailAndPassword('admin@awc.com', '123456');
+                const userDoc = await db.collection('system_users').where('email', '==', 'admin@awc.com').get();
+                if (userDoc.empty) {
+                    const adminUser = auth.currentUser;
+                    if(adminUser) {
+                        await db.collection('system_users').doc(adminUser.uid).set({ email: 'admin@awc.com', role: 'admin', createdAt: new Date().toISOString() });
+                    }
+                }
+            } catch (e) {
+                console.log("Demo admin user likely already exists.");
+            }
+            await auth.signOut();
+
+            const i1 = await safeDb.collection('instructors').add({name: "أحمد علي", spec: "محاسبة", email: "demo.instructor@awc.com"});
             // Courses
             await safeDb.collection('courses').add({name: "محاسبة المطاعم", price: 1200, instructorId: i1.id, instructorName: "أحمد علي"});
             await safeDb.collection('courses').add({name: "محاسبة المقاولات", price: 1500, instructorId: i1.id, instructorName: "أحمد علي"});
@@ -596,29 +1035,168 @@
                 platformUser: "AWC-S-5555", platformPass: "secret123", date: new Date().toISOString()
             });
             
-            alert(`تم إنشاء البيانات!\n\nبيانات الطالب المسجل (أونلاين):\nالكود: AWC-S-5555\nالهاتف: 01000000000`);
+            alert(`تم إنشاء البيانات التجريبية!\n\nيمكنك الدخول كمدير باستخدام:\nEmail: admin@awc.com\nPass: 123456\n\nبيانات الطالب المسجل (أونلاين):\nالكود: AWC-S-5555\nالهاتف: 01000000000`);
             window.location.reload();
         }
 
         // === UI UPDATERS ===
         function updateInstructorsUI() { const h = instructors.map(i=>`<tr class="border-b"><td class="p-2">${i.name}</td><td class="p-2">${i.spec}</td><td class="p-2"><button onclick="deleteItem('instructors','${i.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('instructors-table-body', h); const opts = '<option value="">اختر</option>' + instructors.map(i=>`<option value="${i.id}">${i.name}</option>`).join(''); setHTML('course-instructor', opts); setHTML('lec-instructor-select', opts); }
         function updateCoursesUI() { const h = courses.map(c=>`<tr class="border-b"><td class="p-2">${c.name}</td><td class="p-2">${c.price}</td><td class="p-2">${c.instructorName}</td><td class="p-2"><button onclick="deleteItem('courses','${c.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('courses-table-body', h); const opts = '<option value="">اختر</option>' + courses.map(c=>`<option value="${c.name}" data-price="${c.price}">${c.name}</option>`).join(''); const opts2 = '<option value="">اختر</option>' + courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); setHTML('reg-service', opts); setHTML('lec-course', opts2); }
-        function updateTraineesUI() { setText('stat-total-students', trainees.length); setText('report-total-students', trainees.length); setText('stat-consulting', trainees.filter(t=>t.serviceType==='consulting').length); setText('report-consulting-count', trainees.filter(t=>t.serviceType==='consulting').length); setHTML('trainees-table-body', trainees.slice(0,15).map(t=>`<tr class="border-b"><td class="p-2">${t.name}</td><td class="p-2">${t.service}</td><td class="p-2">${t.status}</td></tr>`).join('')); }
-        function updateTraineesManagementUI() { const term = document.getElementById('trainee-management-search')?.value.toLowerCase()||''; const res = trainees.filter(t => t.name.toLowerCase().includes(term)||(t.code&&t.code.toLowerCase().includes(term))); setHTML('trainees-management-table-body', res.map(t=>`<tr class="border-b hover:bg-gray-50"><td class="p-3 font-mono text-xs">${t.code}</td><td class="p-3 font-bold">${t.name}</td><td class="p-3" dir="ltr">${t.phone}</td><td class="p-3">${t.service}</td><td class="p-3"><span class="px-2 py-1 text-xs rounded ${t.status==='مفعل'?'bg-green-100':'bg-gray-100'}">${t.status}</span></td><td class="p-3 flex gap-2"><button onclick="deleteItem('trainees','${t.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`).join('')); }
-        function updateLecturesUI() { setText('stat-total-lectures', lectures.length); const up = lectures.filter(l=>l.status==='upcoming'), rec = lectures.filter(l=>l.status==='recorded'); const card = l => `<div class="bg-white border p-3 rounded mb-2 flex justify-between"><div><b>${l.title}</b> <span class="text-xs text-gray-500">${l.courseName}</span></div> ${l.link?`<a href="${l.link}" target="_blank" class="text-white bg-blue-500 px-3 py-1 rounded text-xs">مشاهدة</a>`:''}</div>`; setHTML('upcoming-lectures-container', up.map(card).join('')||'<p class="text-center text-gray-400">لا يوجد</p>'); setHTML('recorded-lectures-container', rec.map(card).join('')||'<p class="text-center text-gray-400">لا يوجد</p>'); }
+        function updateTraineesUI() { setText('stat-total-students', trainees.length); setText('stat-consulting', trainees.filter(t=>t.serviceType==='consulting').length); setHTML('trainees-table-body', trainees.slice(0,15).map(t=>`<tr class="border-b"><td class="p-2">${t.name}</td><td class="p-2">${t.service}</td><td class="p-2">${t.status}</td></tr>`).join('')); }
+        function updateTraineesManagementUI() { const term = document.getElementById('trainee-management-search')?.value.toLowerCase()||''; const res = trainees.filter(t => t.name.toLowerCase().includes(term)||(t.code&&t.code.toLowerCase().includes(term))); setHTML('trainees-management-table-body', res.map(t=>`<tr class="border-b hover:bg-gray-50"><td class="p-3 font-mono text-xs">${t.code}</td><td class="p-3 font-bold">${t.name}</td><td class="p-3" dir="ltr">${t.phone}</td><td class="p-3">${t.service}</td><td class="p-3"><span class="px-2 py-1 text-xs rounded ${t.status==='مفعل'?'bg-green-100 text-green-800':'bg-gray-100 text-gray-800'}">${t.status}</span></td><td class="p-3 flex gap-3"><button onclick="showTraineeDetails('${t.id}')" class="text-blue-600 hover:text-blue-800" title="عرض التفاصيل"><i class="fas fa-eye"></i></button><button onclick="deleteItem('trainees','${t.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fas fa-trash"></i></button></td></tr>`).join('')); }
+        function updateUsersUI() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            const tableBody = systemUsers.map(user => {
+                const isSelf = user.id === currentUser.uid;
+                const deleteButton = isSelf 
+                    ? `<span class="text-gray-400 text-xs">لا يمكن الحذف</span>`
+                    : `<button onclick="deleteSystemUser('${user.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fas fa-trash"></i></button>`;
+
+                return `<tr class="border-b">
+                    <td class="p-3 text-sm" dir="ltr">${user.email}</td>
+                    <td class="p-3 text-sm">${user.role === 'admin' ? 'مدير' : 'مساعد'}</td>
+                    <td class="p-3">${deleteButton}</td>
+                </tr>`;
+            }).join('');
+            setHTML('users-table-body', tableBody);
+        }
+        function updateReportsUI() {
+            // Summary Cards
+            setText('report-total-students', trainees.length);
+            setText('report-consulting-count', trainees.filter(t => t.serviceType === 'consulting').length);
+            const completedTrainees = trainees.filter(t => t.payment?.status === 'مدفوع بالكامل').length;
+            setText('report-certificates-count', completedTrainees);
+
+            // Financial Stats
+            const totalRevenue = trainees.reduce((sum, t) => sum + (t.payment?.total || 0), 0);
+            const totalCollected = trainees.reduce((sum, t) => sum + (t.payment?.paid || 0), 0);
+            const totalDue = totalRevenue - totalCollected;
+            const progressPercentage = totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0;
+
+            setText('report-total-revenue', `${totalRevenue.toLocaleString()} EGP`);
+            setText('report-total-collected', `${totalCollected.toLocaleString()} EGP`);
+            setText('report-total-due', `${totalDue.toLocaleString()} EGP`);
+            
+            const progressBar = document.getElementById('report-revenue-progress');
+            if (progressBar) {
+                progressBar.style.width = `${progressPercentage}%`;
+                progressBar.textContent = `${Math.round(progressPercentage)}%`;
+            }
+
+            // Payment Status Breakdown
+            const fullyPaid = trainees.filter(t => t.payment?.status === 'مدفوع بالكامل').length;
+            const partiallyPaid = trainees.filter(t => t.payment?.status === 'جزئي').length;
+            const unpaid = trainees.filter(t => t.payment?.status === 'غير مدفوع' || !t.payment?.status).length;
+
+            setText('report-fully-paid-count', fullyPaid);
+            setText('report-partially-paid-count', partiallyPaid);
+            setText('report-unpaid-count', unpaid);
+
+            // Sources Report
+            const sources = trainees.reduce((acc, t) => { const source = t.source || 'Unknown'; acc[source] = (acc[source] || 0) + 1; return acc; }, {});
+            const totalSources = trainees.length;
+            const sourcesContainer = document.getElementById('sources-report-container');
+            if (sourcesContainer) {
+                if (Object.keys(sources).length > 0) {
+                    sourcesContainer.innerHTML = Object.entries(sources).map(([source, count]) => {
+                        const percentage = totalSources > 0 ? (count / totalSources) * 100 : 0;
+                        const sourceName = { 'Website': 'الموقع الإلكتروني', 'Social': 'سوشيال ميديا', 'Friend': 'ترشيح صديق' }[source] || 'غير معروف';
+                        const color = { 'Website': 'bg-blue-500', 'Social': 'bg-purple-500', 'Friend': 'bg-green-500' }[source] || 'bg-gray-500';
+                        return `<div class="flex justify-between items-center text-sm"><span class="text-gray-600">${sourceName} (${count})</span><div class="w-2/3 bg-gray-200 rounded-full h-2.5"><div class="${color} h-2.5 rounded-full" style="width: ${percentage}%"></div></div></div>`;
+                    }).join('');
+                } else {
+                    sourcesContainer.innerHTML = '<p class="text-center text-gray-400">لا توجد بيانات لعرضها.</p>';
+                }
+            }
+        }
+        function updateLecturesUI() {
+            setText('stat-total-lectures', lectures.length);
+            const up = lectures.filter(l => l.status === 'upcoming'), rec = lectures.filter(l => l.status === 'recorded');
+            const card = l => {
+                const roomName = l.link ? `'${l.link.split('/').pop()}'` : null;
+                const lectureTitle = `'${l.title.replace(/'/g, "\\'")}'`;
+                const joinButton = l.link ? `<button onclick="startJitsiMeeting(${roomName}, ${lectureTitle})" class="text-white bg-blue-500 px-3 py-1 rounded text-xs shadow hover:bg-blue-600">بدء/انضمام</button>` : '';
+                return `<div class="bg-white border p-3 rounded mb-2 flex justify-between items-center"><div><b>${l.title}</b> <span class="text-xs text-gray-500">${l.courseName}</span></div> ${joinButton}</div>`;
+            };
+            setHTML('upcoming-lectures-container', up.map(card).join('') || '<p class="text-center text-gray-400">لا يوجد</p>');
+            setHTML('recorded-lectures-container', rec.map(card).join('') || '<p class="text-center text-gray-400">لا يوجد</p>');
+        }
         function handleAttendanceSearch() { const v = document.getElementById('attendance-search-input').value.toLowerCase(); const res = trainees.filter(t=>t.name.toLowerCase().includes(v)||(t.code&&t.code.toLowerCase().includes(v))); setHTML('attendance-results-container', res.map(t=>`<div class="bg-white border p-4 rounded-lg mb-2 flex justify-between items-center hover:shadow-md transition"><div><b>${t.name}</b><br><small>${t.service}</small></div><div><small>مدفوع: ${t.payment?.paid}/${t.payment?.total}</small> ${t.payment?.status!=='مدفوع بالكامل'?`<div class="flex gap-1 mt-1"><input type="number" id="pay-${t.id}" class="border w-20 p-1 text-xs" placeholder="مبلغ"><button onclick="addPayment('${t.id}')" class="bg-green-500 text-white px-2 rounded text-xs">دفع</button></div>`:'<span class="text-green-600 font-bold text-xs">✓</span>'}</div>${t.status!=='مفعل'?`<button onclick="activateT('${t.id}','${t.name}','${t.whatsapp||t.phone}','${t.country}')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">تفعيل</button>`:'<span class="text-gray-400 text-xs">مفعل</span>'}</div>`).join('')); }
-        async function addPayment(id) { const v = parseFloat(document.getElementById('pay-'+id).value); if(!v) return; const t = trainees.find(x=>x.id==id); const np = (t.payment.paid||0)+v; await safeDb.collection('trainees').doc(id).update({'payment.paid':np, 'payment.status': np>=t.payment.total?'مدفوع بالكامل':'جزئي'}); showNotification('تم الدفع','success'); }
-        async function activateT(id, n, p, c) { await safeDb.collection('trainees').doc(id).update({status:'مفعل'}); openWhatsApp(formatPhone(c,p), `مرحباً ${n}\nتم تفعيل حسابك في النظام.`); showNotification('تم التفعيل','success'); handleAttendanceSearch(); }
+        async function addPayment(id) { const v = parseFloat(document.getElementById('pay-'+id).value); if(!v) return; const t = trainees.find(x=>x.id==id); const np = (t.payment.paid||0)+v; await safeDb.collection('trainees').doc(id).update({'payment.paid':np, 'payment.status': np>=t.payment.total?'مدفوع بالكامل':'جزئي'}); showNotification('تم تحديث المدفوعات','success', 'نجاح'); }
+        async function activateT(id, n, p, c) { await safeDb.collection('trainees').doc(id).update({status:'مفعل'}); openWhatsApp(formatPhone(c,p), `مرحباً ${n}\nتم تفعيل حسابك في النظام.`); showNotification('تم التفعيل','success', 'نجاح'); handleAttendanceSearch(); }
         function handleCertificateSearch() { const v = document.getElementById('certificate-search-input').value.toLowerCase(); const s = trainees.find(t=>t.phone==v || (t.code&&t.code.toLowerCase()==v)); if(s) { if(s.payment?.status==='مدفوع بالكامل') { document.getElementById('certificate-preview-area').classList.remove('hidden'); setText('cert-student-name', s.name); setText('cert-course-name', s.service); setText('cert-code', s.code); setText('cert-date', new Date().toLocaleDateString('ar-EG')); } else alert('يجب سداد الرسوم أولاً'); } }
         function sendCertificateWhatsApp() { showNotification('تم الإرسال (تجريبي)','success'); }
-        function switchLectureTab(t) { ['add', 'upcoming', 'recorded'].forEach(tab => { const el = document.getElementById('lecture-tab-' + tab); if(el) el.classList.add('hidden'); const btn = document.getElementById('tab-'+(tab==='add'?'add-lecture':tab+'-lectures')); if(btn) btn.className = (tab === t) ? "px-4 py-2 text-blue-600 border-b-2 border-blue-600" : "px-4 py-2 text-gray-500"; }); const target = document.getElementById('lecture-tab-' + t); if(target) target.classList.remove('hidden'); }
+        function switchLectureTab(t) {
+            if (t === 'add') {
+                document.getElementById('lecture-tab-add').classList.toggle('hidden');
+                return;
+            }
+            ['upcoming', 'recorded'].forEach(tab => {
+                document.getElementById('lecture-tab-' + tab).classList.add('hidden');
+                const btn = document.getElementById('tab-btn-' + tab);
+                btn.className = "px-4 py-2 text-gray-500 font-semibold";
+            });
+            document.getElementById('lecture-tab-' + t).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-btn-' + t);
+            activeBtn.className = "px-4 py-2 text-blue-600 border-b-2 border-blue-600 font-semibold";
+            document.getElementById('lecture-tab-add').classList.add('hidden');
+        }
         async function handleAddInstructor(e) { e.preventDefault(); await safeDb.collection('instructors').add({name:document.getElementById('inst-name').value, spec:document.getElementById('inst-spec').value, email:document.getElementById('inst-email').value}); showNotification('تم','success'); e.target.reset(); }
         async function handleAddCourse(e) { e.preventDefault(); const iId=document.getElementById('course-instructor').value; const iName=instructors.find(i=>i.id==iId)?.name; await safeDb.collection('courses').add({name:document.getElementById('course-name').value, price:document.getElementById('course-price').value, instructorId:iId, instructorName:iName}); showNotification('تم','success'); e.target.reset(); }
-        async function handleAddLecture(e) { e.preventDefault(); const cId=document.getElementById('lec-course').value; const cName=courses.find(c=>c.id==cId)?.name; await safeDb.collection('lectures').add({title:document.getElementById('lec-title').value, courseName:cName, date:document.getElementById('lec-date').value, time:document.getElementById('lec-time').value, link:document.getElementById('lec-link').value, status:'upcoming'}); showNotification('تم','success'); e.target.reset(); switchLectureTab('upcoming'); }
+        async function handleAddLecture(e) {
+            e.preventDefault();
+            const cId = document.getElementById('lec-course').value;
+            const cName = courses.find(c => c.id == cId)?.name;
+            const notify = document.getElementById('lec-notify').checked;
+            await safeDb.collection('lectures').add({
+                title: document.getElementById('lec-title').value, courseName: cName,
+                date: document.getElementById('lec-date').value, time: document.getElementById('lec-time').value,
+                link: document.getElementById('lec-link').value, status: 'upcoming',
+                notify: notify, notificationSent: false
+            });
+            showNotification('تمت إضافة المحاضرة بنجاح', 'success');
+            e.target.reset();
+            switchLectureTab('upcoming');
+        }
         async function deleteItem(col, id) { if(confirm('حذف؟')) await safeDb.collection(col).doc(id).delete(); }
-        function showNotification(m,t) { setText('notification-message', m); document.getElementById('notification-modal').classList.remove('hidden'); }
+        function showNotification(m,t,title='تنبيه') { setText('notification-title', title); setText('notification-message', m); document.getElementById('notification-modal').classList.remove('hidden'); }
         function closeNotification() { document.getElementById('notification-modal').classList.add('hidden'); }
-        function handleAddNewUser(e){e.preventDefault(); showNotification('لا يمكن في الوضع التجريبي','error');}
+        async function handleAddNewUser(e) {
+            e.preventDefault();
+            if (currentUserRole !== 'admin') {
+                showNotification('ليس لديك الصلاحية لإضافة مستخدمين.', 'error');
+                return;
+            }
+
+            const email = document.getElementById('new-user-email').value;
+            const password = document.getElementById('new-user-password').value;
+            const role = document.getElementById('new-user-role').value;
+
+            try {
+                const tempAppName = 'user-creation-app-' + Date.now();
+                const tempApp = firebase.initializeApp(firebaseConfig, tempAppName);
+                const tempAuth = tempApp.auth();
+                const userCredential = await tempAuth.createUserWithEmailAndPassword(email, password);
+                const newUser = userCredential.user;
+                await db.collection('system_users').doc(newUser.uid).set({ email: newUser.email, role: role, createdAt: new Date().toISOString() });
+                await tempAuth.signOut();
+                await tempApp.delete();
+                showNotification('تم إنشاء المستخدم بنجاح.', 'success');
+                e.target.reset();
+            } catch (error) {
+                console.error("Error creating new user:", error);
+                showNotification(`خطأ في إنشاء المستخدم: ${error.message}`, 'error');
+            }
+        }
+        async function deleteSystemUser(uid) {
+            if (currentUserRole !== 'admin') { showNotification('ليس لديك الصلاحية للحذف.', 'error'); return; }
+            if (confirm(`هل أنت متأكد؟\nسيتم حذف صلاحيات المستخدم. يجب حذفه من Firebase Console بشكل كامل.`)) {
+                try { await db.collection('system_users').doc(uid).delete(); showNotification('تم حذف صلاحيات المستخدم.', 'success'); } 
+                catch (error) { showNotification('حدث خطأ.', 'error'); }
+            }
+        }
     </script>
 </body>
 </html>
