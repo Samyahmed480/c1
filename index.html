@@ -12,6 +12,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
     <!-- Jitsi Meet API -->
     <script src='https://meet.jit.si/external_api.js'></script>
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -75,10 +77,7 @@
                 <button type="submit" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md">دخول الطالب</button>
             </form>
             
-            <div class="flex gap-2 mt-4">
-                <button type="button" onclick="demoLogin()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg border text-sm">دخول تجريبي (أدمن)</button>
-                <button type="button" onclick="seedDatabase()" class="flex-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-bold py-2 px-4 rounded-lg border border-yellow-200 text-sm"><i class="fas fa-database"></i> بيانات تجريبية</button>
-            </div>
+           
         </div>
     </div>
 
@@ -99,6 +98,7 @@
                 <li><a href="#" onclick="showView('courses')" id="nav-courses" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-white/5 transition"><i class="fas fa-book-open ml-3 w-5"></i> الكورسات</a></li>
                 <li><a href="#" onclick="showView('instructors')" id="nav-instructors" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-white/5 transition"><i class="fas fa-chalkboard-teacher ml-3 w-5"></i> المدربين</a></li>
                 <li><a href="#" onclick="showView('reports')" id="nav-reports" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-white/5 transition"><i class="fas fa-chart-pie ml-3 w-5"></i> التقارير</a></li>
+                <li><a href="#" onclick="showView('evaluations')" id="nav-evaluations" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-white/5 transition"><i class="fas fa-star-half-alt ml-3 w-5"></i> التقييمات</a></li>
                 <li><a href="#" onclick="showView('users')" id="nav-users" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-white/5 transition"><i class="fas fa-users-cog ml-3 w-5"></i> المستخدمين</a></li>
             </ul>
         </nav>
@@ -146,9 +146,9 @@
                             <div class="md:col-span-2"><label class="block text-sm font-bold mb-2 text-gray-700">المصدر</label><select id="reg-source" class="w-full p-3 border rounded-lg border-gray-300 bg-white outline-none"><option value="Website">الموقع الإلكتروني</option><option value="Social">سوشيال ميديا</option><option value="Friend">ترشيح صديق</option></select></div>
                             
                             <div id="field-course-select" class="md:col-span-2"><label class="block text-sm font-bold mb-2 text-gray-700">اختر الكورس</label><select id="reg-service" onchange="updatePriceField()" class="w-full p-3 border rounded-lg border-gray-300 bg-white outline-none"><option value="">-- اختر --</option></select></div>
-                            <div id="field-price-display" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">قيمة الاشتراك (EGP)</label><input type="text" id="reg-price-display" readonly class="w-full p-3 border rounded-lg bg-gray-100 text-gray-700 font-bold border-gray-300"></div>
+                            <div id="field-price-display" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">قيمة الاشتراك ($)</label><input type="text" id="reg-price-display" readonly class="w-full p-3 border rounded-lg bg-gray-100 text-gray-700 font-bold border-gray-300"></div>
                             <div id="field-company-name" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">اسم الشركة</label><input type="text" id="reg-company" class="w-full p-3 border rounded-lg border-gray-300 outline-none"></div>
-                            <div id="field-consulting-price" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">قيمة الاستشارة (EGP)</label><input type="number" id="reg-consulting-price" placeholder="0.00" class="w-full p-3 border rounded-lg border-gray-300 outline-none"></div>
+                            <div id="field-consulting-price" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">قيمة الاستشارة ($)</label><input type="number" id="reg-consulting-price" placeholder="0.00" class="w-full p-3 border rounded-lg border-gray-300 outline-none"></div>
                             <div id="field-consulting-details" class="md:col-span-2 hidden"><label class="block text-sm font-bold mb-2 text-gray-700">التفاصيل</label><textarea id="reg-consulting-details" class="w-full p-3 border rounded-lg border-gray-300 outline-none" rows="3"></textarea></div>
 
                             <div class="md:col-span-2 bg-gray-50 p-5 rounded-lg border border-gray-200 mt-2">
@@ -272,9 +272,9 @@
                         <div class="border p-4 rounded-lg lg:col-span-2">
                             <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">التقرير المالي المفصل</h3>
                             <div class="grid grid-cols-3 gap-4 text-center mb-4">
-                                <div class="bg-blue-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي الإيرادات</h4><p id="report-total-revenue" class="text-lg font-bold text-primary">0 EGP</p></div>
-                                <div class="bg-green-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي المحصل</h4><p id="report-total-collected" class="text-lg font-bold text-green-600">0 EGP</p></div>
-                                <div class="bg-red-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي المتبقي</h4><p id="report-total-due" class="text-lg font-bold text-red-600">0 EGP</p></div>
+                                <div class="bg-blue-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي الإيرادات</h4><p id="report-total-revenue" class="text-lg font-bold text-primary">$0</p></div>
+                                <div class="bg-green-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي المحصل</h4><p id="report-total-collected" class="text-lg font-bold text-green-600">$0</p></div>
+                                <div class="bg-red-50 p-3 rounded"><h4 class="text-xs text-gray-500">إجمالي المتبقي</h4><p id="report-total-due" class="text-lg font-bold text-red-600">$0</p></div>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4 mb-6"><div id="report-revenue-progress" class="bg-green-500 h-4 rounded-full text-center text-white text-xs font-bold" style="width: 0%"></div></div>
                             <div>
@@ -295,7 +295,30 @@
                         </div>
                     </div>
 
-                    <h3 class="font-bold text-gray-700 mb-2">أحدث المسجلين</h3>
+                    <!-- Instructor Performance Report -->
+                    <div class="mt-8 border-t pt-6">
+                        <h3 class="font-bold text-gray-700 mb-4">تقرير أداء المدربين</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                            <!-- Chart -->
+                            <div class="lg:col-span-3 bg-white p-4 rounded-lg border h-80">
+                                <canvas id="instructorPerformanceChart"></canvas>
+                            </div>
+                            <!-- Table -->
+                            <div class="lg:col-span-2 overflow-x-auto border rounded-lg bg-white">
+                                <table class="w-full text-right">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="p-3 text-sm font-semibold">المدرب</th>
+                                            <th class="p-3 text-sm font-semibold text-center">الطلاب</th>
+                                            <th class="p-3 text-sm font-semibold text-center">المحاضرات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="instructor-performance-report-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-700 mb-2 mt-8">أحدث المسجلين</h3>
                     <div class="overflow-x-auto border rounded-lg"><table class="w-full text-right"><thead class="bg-gray-50"><tr><th class="p-3">الاسم</th><th class="p-3">الخدمة</th><th class="p-3">الحالة</th></tr></thead><tbody id="trainees-table-body"></tbody></table></div>
                 </div>
             </div>
@@ -303,13 +326,18 @@
             <!-- 7. Instructors View (FIXED) -->
             <div id="view-instructors" class="view-section fade-in hidden">
                 <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <h2 class="font-bold mb-4 text-primary">إدارة المدربين</h2>
-                    <form id="addInstructorForm" onsubmit="handleAddInstructor(event)" class="flex flex-wrap gap-2 mb-4">
-                        <input type="text" id="inst-name" placeholder="الاسم" class="border p-2 rounded flex-1" required>
-                        <input type="text" id="inst-spec" placeholder="التخصص" class="border p-2 rounded flex-1" required>
-                        <input type="email" id="inst-email" placeholder="البريد" class="border p-2 rounded flex-1">
-                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded">إضافة</button>
+                    <h2 class="text-xl font-bold mb-4 text-primary">إدارة المدربين</h2>
+                    <form id="addInstructorForm" onsubmit="handleAddInstructor(event)" class="space-y-4 bg-gray-50 p-4 rounded-lg border mb-6">
+                        <h3 class="font-bold text-gray-700">إضافة مدرب جديد</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="inst-name" placeholder="اسم المدرب الكامل" class="p-2 border rounded" required>
+                            <input type="text" id="inst-spec" placeholder="التخصص (مثال: محاسبة مالية)" class="p-2 border rounded" required>
+                            <input type="email" id="inst-email" placeholder="البريد الإلكتروني (للدخول)" class="p-2 border rounded md:col-span-2" required>
+                            <input type="password" id="inst-password" placeholder="كلمة مرور مؤقتة" class="p-2 border rounded md:col-span-2" required>
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white px-6 py-2 rounded font-bold">إنشاء حساب مدرب</button>
                     </form>
+                    <h3 class="font-bold text-gray-700 mb-2">المدربين الحاليين</h3>
                     <table class="w-full"><tbody id="instructors-table-body"></tbody></table>
                 </div>
             </div>
@@ -363,6 +391,28 @@
                                 </table>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10. Evaluations View -->
+            <div id="view-evaluations" class="view-section fade-in hidden">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4 text-primary">تقييمات الطلاب</h2>
+                    <div class="overflow-x-auto border rounded-lg">
+                        <table class="w-full text-right">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 text-sm font-semibold">الطالب</th>
+                                    <th class="p-3 text-sm font-semibold">الكورس</th>
+                                    <th class="p-3 text-sm font-semibold">المدرب المقيم</th>
+                                    <th class="p-3 text-sm font-semibold">التقييم</th>
+                                    <th class="p-3 text-sm font-semibold">ملاحظات</th>
+                                    <th class="p-3 text-sm font-semibold">التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="evaluations-table-body"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -432,9 +482,9 @@
                                 <span id="trainee-detail-course-name" class="text-sm text-primary font-bold bg-blue-50 px-3 py-1 rounded-full"></span>
                             </div>
                             <div class="grid grid-cols-3 gap-4 text-center">
-                                <div><p class="text-xs text-gray-500">الإجمالي</p><p class="font-bold" id="trainee-portal-total">0</p></div>
-                                <div><p class="text-xs text-gray-500">المدفوع</p><p class="font-bold text-green-600" id="trainee-portal-paid">0</p></div>
-                                <div><p class="text-xs text-gray-500">المتبقي</p><p class="font-bold text-red-600" id="trainee-portal-remain">0</p></div>
+                                <div><p class="text-xs text-gray-500">الإجمالي</p><p class="font-bold" id="trainee-portal-total">$0</p></div>
+                                <div><p class="text-xs text-gray-500">المدفوع</p><p class="font-bold text-green-600" id="trainee-portal-paid">$0</p></div>
+                                <div><p class="text-xs text-gray-500">المتبقي</p><p class="font-bold text-red-600" id="trainee-portal-remain">$0</p></div>
                             </div>
                             <div class="mt-4 w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-600 h-2.5 rounded-full" id="trainee-portal-progress" style="width: 0%"></div></div>
                         </div>
@@ -501,6 +551,20 @@
             </div>
         </div>
     </div>
+    <div id="evaluation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" onclick="closeEvaluationModal()">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg" onclick="event.stopPropagation()">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="font-bold text-lg text-primary">تقييم الطالب: <span id="eval-student-name"></span></h3>
+                <button onclick="closeEvaluationModal()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            <form id="evaluation-form" onsubmit="handleStudentEvaluation(event)" class="p-6 space-y-4">
+                <input type="hidden" id="eval-trainee-id">
+                <div><label class="block text-sm font-bold mb-2 text-gray-700">التقييم (من 10)</label><input type="number" id="eval-rating" min="1" max="10" class="w-full p-2 border rounded" required></div>
+                <div><label class="block text-sm font-bold mb-2 text-gray-700">ملاحظات المدرب</label><textarea id="eval-comment" rows="4" class="w-full p-2 border rounded" placeholder="اكتب ملاحظاتك هنا..."></textarea></div>
+                <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition">حفظ التقييم</button>
+            </form>
+        </div>
+    </div>
     <div id="notification-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-black/50"><div class="bg-white p-6 rounded-lg w-80 text-center shadow-xl"><h3 id="notification-title" class="font-bold text-lg mb-2">تنبيه</h3><p id="notification-message" class="text-gray-600 mb-4">...</p><button onclick="closeNotification()" class="bg-primary text-white px-6 py-2 rounded">حسناً</button></div></div>
 
     <script>
@@ -524,11 +588,12 @@
 
         let jitsiApi = null;
         function startJitsiMeeting(roomName, lectureTitle) {
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
             const domain = 'meet.jit.si';
             const options = {
                 roomName: roomName, width: '100%', height: '100%',
                 parentNode: document.querySelector('#jitsi-container'),
-                userInfo: { displayName: 'Admin' },
+                userInfo: { displayName: currentInstructorProfile ? currentInstructorProfile.name : 'Admin' },
                 configOverwrite: { prejoinPageEnabled: false, startWithAudioMuted: true, startWithVideoMuted: true },
                 interfaceConfigOverwrite: {
                     SHOW_JITSI_WATERMARK: false, SHOW_WATERMARK_FOR_GUESTS: false,
@@ -544,6 +609,7 @@
         }
 
         function joinJitsiMeetingAsTrainee(roomName, lectureTitle) {
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
             const domain = 'meet.jit.si';
             const traineeName = currentTrainee ? currentTrainee.name : 'Student';
             const options = {
@@ -567,6 +633,7 @@
         }
 
         function closeJitsiMeeting() {
+            document.body.style.overflow = 'auto'; // Restore scrolling
             if (jitsiApi) {
                 jitsiApi.dispose();
                 jitsiApi = null;
@@ -646,6 +713,7 @@
 
         // === PERMISSIONS & RBAC ===
         async function fetchUserRole(user) {
+            currentInstructorProfile = null; // Reset on every fetch
             if (!user) {
                 currentUserRole = null;
                 applyPermissions();
@@ -654,6 +722,13 @@
             const userDoc = await db.collection('system_users').doc(user.uid).get();
             if (userDoc.exists) {
                 currentUserRole = userDoc.data().role;
+                if (currentUserRole === 'instructor') {
+                    // Find the instructor profile linked by UID. Assuming 'uid' field exists in instructors collection.
+                    const instructorQuery = await safeDb.collection('instructors').where('uid', '==', user.uid).limit(1).get();
+                    if (!instructorQuery.empty) {
+                        currentInstructorProfile = { id: instructorQuery.docs[0].id, ...instructorQuery.docs[0].data() };
+                    }
+                }
             } else {
                 // This might be the very first admin. Let's check if system_users is empty.
                 const usersSnapshot = await db.collection('system_users').limit(1).get();
@@ -677,25 +752,50 @@
 
         function applyPermissions() {
             const isAdmin = currentUserRole === 'admin';
-            const elementsToToggle = ['nav-reports', 'nav-users', 'nav-instructors', 'nav-courses'];
+            const isInstructor = currentUserRole === 'instructor';
+
+            // Restore original names first
+            const traineesLink = document.querySelector('#nav-trainees');
+            if (traineesLink) traineesLink.innerHTML = '<i class="fas fa-users ml-3 w-5"></i> إدارة المتدربين';
+            const lecturesLink = document.querySelector('#nav-lectures');
+            if (lecturesLink) lecturesLink.innerHTML = '<i class="fas fa-video ml-3 w-5"></i> جدول المحاضرات';
             
-            elementsToToggle.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.style.display = isAdmin ? 'flex' : 'none';
+            // Show all links by default, then hide based on role
+            document.querySelectorAll('.sidebar-link').forEach(el => el.style.display = 'flex');
+
+            if (isInstructor) {
+                const instructorHiddenLinks = ['nav-register', 'nav-attendance', 'nav-certificates', 'nav-courses', 'nav-instructors', 'nav-reports', 'nav-users', 'nav-evaluations'];
+                instructorHiddenLinks.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                // Rename links for instructor
+                if (traineesLink) traineesLink.innerHTML = '<i class="fas fa-users ml-3 w-5"></i> طلابي';
+                if (lecturesLink) lecturesLink.innerHTML = '<i class="fas fa-video ml-3 w-5"></i> محاضراتي';
+            } else { // Assistant or Admin
+                const adminOnlyElements = ['nav-reports', 'nav-users', 'nav-instructors', 'nav-courses', 'nav-evaluations'];
+                if (!isAdmin) { // This is an assistant
+                    adminOnlyElements.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = 'none';
+                    });
                 }
-            });
+            }
 
             // If a non-admin is on a restricted view, redirect them.
             const currentViewId = document.querySelector('.view-section:not(.hidden)')?.id.replace('view-', '');
-            const restrictedViews = ['reports', 'users', 'instructors', 'courses'];
-            if (!isAdmin && restrictedViews.includes(currentViewId)) {
+            const adminRestrictedViews = ['reports', 'users', 'instructors', 'courses', 'evaluations'];
+            if (!isAdmin && adminRestrictedViews.includes(currentViewId)) {
+                showView('dashboard');
+            }
+            const instructorRestrictedViews = ['register', 'attendance', 'certificates', 'courses', 'instructors', 'reports', 'users', 'evaluations'];
+            if (isInstructor && instructorRestrictedViews.includes(currentViewId)) {
                 showView('dashboard');
             }
         }
 
         // === STATE ===
-        let trainees=[], lectures=[], instructors=[], courses=[], currentTrainee=null, allTraineeEnrollments=[], systemUsers=[], currentUserRole = null;
+        let trainees=[], lectures=[], instructors=[], courses=[], currentTrainee=null, allTraineeEnrollments=[], systemUsers=[], currentUserRole = null, currentInstructorProfile = null, instructorPerformanceChart = null;
 
         // === INIT ===
         document.addEventListener('DOMContentLoaded', async () => {
@@ -727,16 +827,16 @@
         function initListeners() {
             safeDb.collection('instructors').onSnapshot(s => { instructors=s.docs.map(d=>({id:d.id,...d.data()})); updateInstructorsUI(); });
             safeDb.collection('courses').onSnapshot(s => { courses=s.docs.map(d=>({id:d.id,...d.data()})); updateCoursesUI(); });
-            safeDb.collection('lectures').orderBy('date','desc').onSnapshot(s => { lectures=s.docs.map(d=>({id:d.id,...d.data()})); updateLecturesUI(); });
-            safeDb.collection('trainees').orderBy('date','desc').onSnapshot(s => { trainees=s.docs.map(d=>({id:d.id,...d.data()})); updateTraineesUI(); updateTraineesManagementUI(); updateReportsUI(); });
+            safeDb.collection('lectures').orderBy('date','desc').onSnapshot(s => { lectures=s.docs.map(d=>({id:d.id,...d.data()})); updateLecturesUI(); if(currentTrainee) selectTraineeCourse(currentTrainee.id); });
+            safeDb.collection('trainees').orderBy('date','desc').onSnapshot(s => { trainees=s.docs.map(d=>({id:d.id,...d.data()})); updateTraineesUI(); updateTraineesManagementUI(); updateReportsUI(); updateEvaluationsUI(); });
             db.collection('system_users').onSnapshot(s => { systemUsers = s.docs.map(d => ({ id: d.id, ...d.data() })); updateUsersUI(); });
         }
 
         // === VIEWS ===
         function showView(id) {
             // RBAC check
-            const restrictedViews = ['reports', 'users', 'instructors', 'courses'];
-            if (currentUserRole !== 'admin' && restrictedViews.includes(id)) {
+            const adminRestrictedViews = ['reports', 'users', 'instructors', 'courses', 'evaluations'];
+            if (currentUserRole !== 'admin' && adminRestrictedViews.includes(id)) {
                 showNotification('ليس لديك الصلاحية للوصول لهذه الصفحة.', 'error');
                 id = 'dashboard'; // Redirect to dashboard
             }
@@ -749,7 +849,15 @@
             if(id==='trainees') updateTraineesManagementUI();
             if(id==='reports') updateReportsUI();
             if(id==='users') updateUsersUI();
-            setText('page-title', {'dashboard':'لوحة التحكم','register':'تسجيل متدرب','attendance':'تفعيل الحضور','trainees':'إدارة المتدربين','certificates':'الشهادات','lectures':'المحاضرات','instructors':'المدربين','courses':'الكورسات','reports':'التقارير','users':'المستخدمين'}[id]||'AWC System');
+            if(id==='evaluations') updateEvaluationsUI();
+            let pageTitle = {'dashboard':'لوحة التحكم','register':'تسجيل متدرب','attendance':'تفعيل الحضور','trainees':'إدارة المتدربين','certificates':'الشهادات','lectures':'المحاضرات','instructors':'المدربين','courses':'الكورسات','reports':'التقارير','users':'المستخدمين', 'evaluations':'التقييمات'}[id]||'AWC System';
+            
+            if (currentUserRole === 'instructor') {
+                if (id === 'trainees') pageTitle = 'طلابك';
+                if (id === 'lectures') pageTitle = 'محاضراتك';
+            }
+
+            setText('page-title', pageTitle);
         }
         function toggleLoginType(t) {
             if(t==='admin') { document.getElementById('admin-login-form').classList.remove('hidden'); document.getElementById('trainee-login-form').classList.add('hidden'); }
@@ -827,7 +935,7 @@
 
             setText('trainee-detail-course-name', s.service);
             const tot=s.payment?.total||0, pd=s.payment?.paid||0;
-            setText('trainee-portal-total', tot+' EGP'); setText('trainee-portal-paid', pd+' EGP'); setText('trainee-portal-remain', (tot-pd)+' EGP');
+            setText('trainee-portal-total', '$'+tot); setText('trainee-portal-paid', '$'+pd); setText('trainee-portal-remain', '$'+(tot-pd));
             const pct=tot>0?Math.min(100,(pd/tot)*100):0;
             const prog=document.getElementById('trainee-portal-progress'); if(prog) prog.style.width=pct+'%';
 
@@ -847,7 +955,9 @@
                     }
                 } else if (l.status === 'recorded') {
                     statusBadge = `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">مسجلة</span>`;
-                    if (l.link) {
+                    if (l.recordingUrl) { // NEW: Check for recordingUrl
+                        actionButton = `<a href="${l.recordingUrl}" target="_blank" class="text-white bg-green-500 px-3 py-1 rounded text-xs shadow hover:bg-green-600">مشاهدة التسجيل</a>`;
+                    } else if (l.link) { // Fallback to Jitsi link if no recording
                         actionButton = `<button onclick="joinJitsiMeetingAsTrainee(${roomName}, ${lectureTitle})" class="text-white bg-gray-500 px-3 py-1 rounded text-xs shadow hover:bg-gray-600">مشاهدة</button>`;
                     }
                 }
@@ -943,8 +1053,8 @@
                     <div class="col-span-2 bg-gray-50 p-4 rounded-lg border mt-4">
                         <h4 class="font-bold text-gray-700 mb-2">البيانات المالية</h4>
                         <div class="grid grid-cols-3 gap-2 text-center">
-                            <div><p class="text-xs text-gray-500">الإجمالي</p><p class="font-bold text-lg">${trainee.payment.total} EGP</p></div>
-                            <div><p class="text-xs text-gray-500">المدفوع</p><p class="font-bold text-lg text-green-600">${trainee.payment.paid} EGP</p></div>
+                            <div><p class="text-xs text-gray-500">الإجمالي</p><p class="font-bold text-lg">$${trainee.payment.total}</p></div>
+                            <div><p class="text-xs text-gray-500">المدفوع</p><p class="font-bold text-lg text-green-600">$${trainee.payment.paid}</p></div>
                             <div><p class="text-xs text-gray-500">حالة السداد</p><p class="font-bold text-base">${trainee.payment.status}</p></div>
                         </div>
                     </div>
@@ -1010,7 +1120,21 @@
                     msg = `مرحباً ${name}،\nتم تسجيل طلب الاستشارة المالية الخاص بكم بنجاح.\n\nكود العميل: ${code}\n\nسيتم التواصل معكم قريباً من خلال فريقنا لتحديد الموعد ومناقشة التفاصيل.\n\nشكراً لاختياركم AWC System.`;
                 } else { // course or recorded
                     if (isPaid) {
-                        msg = `مرحباً ${name}،\nتم تأكيد اشتراكك في "${srv}" بنجاح!\n\nالكود الخاص بك هو: ${code}\n\n${type === 'recorded' ? `يمكنك الآن الدخول إلى منصة المحاضرات المسجلة بالبيانات التالية:\nUser: ${platUser}\nPass: ${platPass}\n\n(يرجى عدم مشاركة هذه البيانات)` : 'سيتم إضافتك لمجموعات الواتساب الخاصة بالكورس.'}\n\nبالتوفيق!`;
+                        msg = `مرحباً، ${name}
+تم تأكيد اشتراكك وتفعيل حضورك في كورس "${srv}"
+كود الطالب الخاص بك هو: ${code}
+
+يرجى الاحتفاظ بالكود، سيتم استخدامه في متابعة حضورك.`;
+
+                        if (type === 'recorded') {
+                            msg += `\n\nلأن الكورس مسجل، يمكنك الآن الدخول إلى منصة المحاضرات باستخدام البيانات التالية:
+User: ${platUser}
+Pass: ${platPass}
+(يرجى عدم مشاركة هذه البيانات)`;
+                        }
+
+                        msg += `\n\nتم الارسال بواسطة،
+AWC Academy`;
                     } else {
                         msg = `مرحباً ${name}،\nتم تسجيلك مبدئياً في كورس "${srv}".\n\nالكود الخاص بك هو: ${code}\n\nيرجى إتمام عملية سداد الرسوم لتفعيل اشتراكك واستلام بيانات الدخول.\n\nشكراً لك.`;
                     }
@@ -1060,14 +1184,37 @@
 
         // === UI UPDATERS ===
         function updateInstructorsUI() { const h = instructors.map(i=>`<tr class="border-b"><td class="p-2">${i.name}</td><td class="p-2">${i.spec}</td><td class="p-2"><button onclick="deleteItem('instructors','${i.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('instructors-table-body', h); const opts = '<option value="">اختر</option>' + instructors.map(i=>`<option value="${i.id}">${i.name}</option>`).join(''); setHTML('course-instructor', opts); setHTML('lec-instructor-select', opts); }
-        function updateCoursesUI() { const h = courses.map(c=>`<tr class="border-b"><td class="p-2">${c.name}</td><td class="p-2">${c.price}</td><td class="p-2">${c.instructorName}</td><td class="p-2"><button onclick="deleteItem('courses','${c.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('courses-table-body', h); const opts = '<option value="">-- اختر --</option>' + courses.map(c=>`<option value="${c.name}" data-price="${c.price}">${c.name}</option>`).join(''); const opts2 = '<option value="">-- اختر --</option>' + courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); setHTML('reg-service', opts); setHTML('lec-course', opts2); }
+        function updateCoursesUI() { const h = courses.map(c=>`<tr class="border-b"><td class="p-2">${c.name}</td><td class="p-2">$${c.price}</td><td class="p-2">${c.instructorName}</td><td class="p-2"><button onclick="deleteItem('courses','${c.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('courses-table-body', h); const opts = '<option value="">-- اختر --</option>' + courses.map(c=>`<option value="${c.name}" data-price="${c.price}">${c.name}</option>`).join(''); const opts2 = '<option value="">-- اختر --</option>' + courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); setHTML('reg-service', opts); setHTML('lec-course', opts2); }
         function updateTraineesUI() { 
             setText('stat-total-students', trainees.length); 
             setText('stat-consulting', trainees.filter(t=>t.serviceType==='consulting').length); 
             setHTML('trainees-table-body', trainees.slice(0,15).map(t=>`<tr class="border-b"><td class="p-2">${t.name}</td><td class="p-2">${t.service}</td><td class="p-2">${t.status}</td></tr>`).join('')); 
             updateCertificateTraineeSelect();
         }
-        function updateTraineesManagementUI() { const term = document.getElementById('trainee-management-search')?.value.toLowerCase()||''; const res = trainees.filter(t => t.name.toLowerCase().includes(term)||(t.code&&t.code.toLowerCase().includes(term))); setHTML('trainees-management-table-body', res.map(t=>`<tr class="border-b hover:bg-gray-50"><td class="p-3 font-mono text-xs">${t.code}</td><td class="p-3 font-bold">${t.name}</td><td class="p-3" dir="ltr">${t.phone}</td><td class="p-3">${t.service}</td><td class="p-3"><span class="px-2 py-1 text-xs rounded ${t.status==='مفعل'?'bg-green-100 text-green-800':'bg-gray-100 text-gray-800'}">${t.status}</span></td><td class="p-3 flex gap-3"><button onclick="showTraineeDetails('${t.id}')" class="text-blue-600 hover:text-blue-800" title="عرض التفاصيل"><i class="fas fa-eye"></i></button><button onclick="deleteItem('trainees','${t.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fas fa-trash"></i></button></td></tr>`).join('')); }
+        function updateTraineesManagementUI() { 
+            const term = document.getElementById('trainee-management-search')?.value.toLowerCase()||''; 
+            
+            let traineesToDisplay = trainees;
+
+            if (currentUserRole === 'instructor' && currentInstructorProfile) {
+                const myCourses = courses.filter(c => c.instructorId === currentInstructorProfile.id).map(c => c.name);
+                traineesToDisplay = trainees.filter(t => myCourses.includes(t.service));
+            } else if (currentUserRole === 'instructor') {
+                traineesToDisplay = []; // Instructor profile not found or not loaded, show no students
+            }
+
+            const res = traineesToDisplay.filter(t => t.name.toLowerCase().includes(term)||(t.code&&t.code.toLowerCase().includes(term))); 
+            
+            const canDelete = currentUserRole === 'admin';
+            const canEvaluate = currentUserRole === 'instructor';
+
+            setHTML('trainees-management-table-body', res.map(t => {
+                let actions = `<button onclick="showTraineeDetails('${t.id}')" class="text-blue-600 hover:text-blue-800" title="عرض التفاصيل"><i class="fas fa-eye"></i></button>`;
+                if (canDelete) { actions += `<button onclick="deleteItem('trainees','${t.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fas fa-trash"></i></button>`; }
+                if (canEvaluate) { actions += `<button onclick="openEvaluationModal('${t.id}')" class="text-yellow-600 hover:text-yellow-800" title="تقييم الطالب"><i class="fas fa-star"></i></button>`; }
+                return `<tr class="border-b hover:bg-gray-50"><td class="p-3 font-mono text-xs">${t.code}</td><td class="p-3 font-bold">${t.name}</td><td class="p-3" dir="ltr">${t.phone}</td><td class="p-3">${t.service}</td><td class="p-3"><span class="px-2 py-1 text-xs rounded ${t.status==='مفعل'?'bg-green-100 text-green-800':'bg-gray-100 text-gray-800'}">${t.status}</span></td><td class="p-3 flex gap-3">${actions}</td></tr>`;
+            }).join('')); 
+        }
         function updateUsersUI() {
             const currentUser = auth.currentUser;
             if (!currentUser) return;
@@ -1099,9 +1246,9 @@
             const totalDue = totalRevenue - totalCollected;
             const progressPercentage = totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0;
 
-            setText('report-total-revenue', `${totalRevenue.toLocaleString()} EGP`);
-            setText('report-total-collected', `${totalCollected.toLocaleString()} EGP`);
-            setText('report-total-due', `${totalDue.toLocaleString()} EGP`);
+            setText('report-total-revenue', `$${totalRevenue.toLocaleString()}`);
+            setText('report-total-collected', `$${totalCollected.toLocaleString()}`);
+            setText('report-total-due', `$${totalDue.toLocaleString()}`);
             
             const progressBar = document.getElementById('report-revenue-progress');
             if (progressBar) {
@@ -1134,22 +1281,149 @@
                     sourcesContainer.innerHTML = '<p class="text-center text-gray-400">لا توجد بيانات لعرضها.</p>';
                 }
             }
+            updateInstructorPerformanceReport();
+        }
+        function updateInstructorPerformanceReport() {
+            const reportBody = document.getElementById('instructor-performance-report-body');
+            if (!reportBody) return;
+
+            if (instructors.length === 0) {
+                reportBody.innerHTML = `<tr><td colspan="3" class="text-center p-6 text-gray-400">لا يوجد مدربين.</td></tr>`;
+                return;
+            }
+
+            const reportData = instructors.map(instructor => {
+                const instructorCourses = courses.filter(c => c.instructorId === instructor.id);
+                const instructorCourseNames = instructorCourses.map(c => c.name);
+                const lectureCount = lectures.filter(l => instructorCourseNames.includes(l.courseName)).length;
+                const studentCount = trainees.filter(t => instructorCourseNames.includes(t.service)).length;
+                return { name: instructor.name, studentCount, lectureCount };
+            });
+
+            const tableRowsHtml = reportData.map(data => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 font-bold">${data.name}</td>
+                    <td class="p-3 text-center font-bold text-lg text-primary">${data.studentCount}</td>
+                    <td class="p-3 text-center font-bold text-lg text-secondary">${data.lectureCount}</td>
+                </tr>`).join('');
+            reportBody.innerHTML = tableRowsHtml;
+
+            renderInstructorPerformanceChart(reportData);
+        }
+
+        function renderInstructorPerformanceChart(reportData) {
+            const ctx = document.getElementById('instructorPerformanceChart')?.getContext('2d');
+            if (!ctx) return;
+
+            if (instructorPerformanceChart) {
+                instructorPerformanceChart.destroy();
+            }
+
+            const labels = reportData.map(d => d.name);
+            const studentData = reportData.map(d => d.studentCount);
+            const lectureData = reportData.map(d => d.lectureCount);
+
+            instructorPerformanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'عدد الطلاب', data: studentData, backgroundColor: 'rgba(30, 58, 138, 0.7)', borderColor: 'rgba(30, 58, 138, 1)', borderWidth: 1 },
+                        { label: 'عدد المحاضرات', data: lectureData, backgroundColor: 'rgba(29, 78, 216, 0.7)', borderColor: 'rgba(29, 78, 216, 1)', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false }
+                    }
+                }
+            });
         }
         function updateLecturesUI() {
             setText('stat-total-lectures', lectures.length);
-            const up = lectures.filter(l => l.status === 'upcoming'), rec = lectures.filter(l => l.status === 'recorded');
+
+            let myCourses = [];
+            if (currentUserRole === 'instructor' && currentInstructorProfile) {
+                myCourses = courses.filter(c => c.instructorId === currentInstructorProfile.id).map(c => c.name);
+            }
+
+            const lecturesToDisplay = (currentUserRole === 'instructor' && currentInstructorProfile)
+                ? lectures.filter(l => myCourses.includes(l.courseName))
+                : lectures;
+
+            const up = lecturesToDisplay.filter(l => l.status === 'upcoming');
+            const rec = lecturesToDisplay.filter(l => l.status === 'recorded');
+
             const card = l => {
                 const roomName = l.link ? `'${l.link.split('/').pop()}'` : null;
                 const lectureTitle = `'${l.title.replace(/'/g, "\\'")}'`;
-                const joinButton = l.link ? `<button onclick="startJitsiMeeting(${roomName}, ${lectureTitle})" class="text-white bg-blue-500 px-3 py-1 rounded text-xs shadow hover:bg-blue-600">بدء/انضمام</button>` : '';
-                return `<div class="bg-white border p-3 rounded mb-2 flex justify-between items-center"><div><b>${l.title}</b> <span class="text-xs text-gray-500">${l.courseName}</span></div> ${joinButton}</div>`;
+                let actionButton = '';
+
+                if (currentUserRole === 'instructor') {
+                    if (l.status === 'upcoming' && l.link) {
+                        actionButton = `<button onclick="startJitsiMeeting(${roomName}, ${lectureTitle})" class="text-white bg-blue-500 px-3 py-1 rounded text-xs shadow hover:bg-blue-600">بدء المحاضرة</button>`;
+                    } else if (l.status === 'recorded') {
+                        if (l.recordingUrl) {
+                            actionButton = `<a href="${l.recordingUrl}" target="_blank" class="text-white bg-green-500 px-3 py-1 rounded text-xs shadow hover:bg-green-600">مشاهدة التسجيل</a>`;
+                        } else {
+                            actionButton = `
+                                <label class="cursor-pointer text-white bg-purple-500 px-3 py-1 rounded text-xs shadow hover:bg-purple-600">
+                                    <span>رفع تسجيل</span>
+                                    <input type="file" class="hidden" accept="video/*,audio/*" onchange="handleRecordingUpload(event, '${l.id}')">
+                                </label>
+                            `;
+                        }
+                    }
+                } else { // Admin/Assistant view
+                    actionButton = l.link ? `<button onclick="startJitsiMeeting(${roomName}, ${lectureTitle})" class="text-white bg-blue-500 px-3 py-1 rounded text-xs shadow hover:bg-blue-600">بدء/انضمام</button>` : '';
+                }
+
+                return `<div class="bg-white border p-3 rounded mb-2 flex justify-between items-center"><div><b>${l.title}</b> <span class="text-xs text-gray-500">${l.courseName}</span><div id="upload-progress-${l.id}" class="text-xs text-blue-600 font-bold"></div></div> ${actionButton}</div>`;
             };
-            setHTML('upcoming-lectures-container', up.map(card).join('') || '<p class="text-center text-gray-400">لا يوجد</p>');
-            setHTML('recorded-lectures-container', rec.map(card).join('') || '<p class="text-center text-gray-400">لا يوجد</p>');
+            setHTML('upcoming-lectures-container', up.map(card).join('') || '<p class="text-center text-gray-400">لا يوجد محاضرات قادمة.</p>');
+            setHTML('recorded-lectures-container', rec.map(card).join('') || '<p class="text-center text-gray-400">لا يوجد محاضرات في الأرشيف.</p>');
+            
+            if (document.getElementById('tab-btn-add')) {
+                document.getElementById('tab-btn-add').style.display = currentUserRole === 'instructor' ? 'none' : 'flex';
+            }
         }
         function handleAttendanceSearch() { const v = document.getElementById('attendance-search-input').value.toLowerCase(); const res = trainees.filter(t=>t.name.toLowerCase().includes(v)||(t.code&&t.code.toLowerCase().includes(v))); setHTML('attendance-results-container', res.map(t=>`<div class="bg-white border p-4 rounded-lg mb-2 flex justify-between items-center hover:shadow-md transition"><div><b>${t.name}</b><br><small>${t.service}</small></div><div><small>مدفوع: ${t.payment?.paid}/${t.payment?.total}</small> ${t.payment?.status!=='مدفوع بالكامل'?`<div class="flex gap-1 mt-1"><input type="number" id="pay-${t.id}" class="border w-20 p-1 text-xs" placeholder="مبلغ"><button onclick="addPayment('${t.id}')" class="bg-green-500 text-white px-2 rounded text-xs">دفع</button></div>`:'<span class="text-green-600 font-bold text-xs">✓</span>'}</div>${t.status!=='مفعل'?`<button onclick="activateT('${t.id}','${t.name}','${t.whatsapp||t.phone}','${t.country}')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">تفعيل</button>`:'<span class="text-gray-400 text-xs">مفعل</span>'}</div>`).join('')); }
         async function addPayment(id) { const v = parseFloat(document.getElementById('pay-'+id).value); if(!v) return; const t = trainees.find(x=>x.id==id); const np = (t.payment.paid||0)+v; await safeDb.collection('trainees').doc(id).update({'payment.paid':np, 'payment.status': np>=t.payment.total?'مدفوع بالكامل':'جزئي'}); showNotification('تم تحديث المدفوعات','success', 'نجاح'); }
-        async function activateT(id, n, p, c) { await safeDb.collection('trainees').doc(id).update({status:'مفعل'}); openWhatsApp(formatPhone(c,p), `مرحباً ${n}\nتم تفعيل حسابك في النظام.`); showNotification('تم التفعيل','success', 'نجاح'); handleAttendanceSearch(); }
+        async function activateT(id, n, p, c) {
+            const trainee = trainees.find(t => t.id === id);
+            if (!trainee) {
+                showNotification('خطأ: لم يتم العثور على الطالب.', 'error');
+                return;
+            }
+            const code = trainee.code;
+            const loginLink = 'https://samyahmed480.github.io/c1/';
+
+            const msg = `مرحبا، ${n}
+تم إنشاء حسابك على منصة أكاديمية AWC لمتابعة الجدول والحضور الأونلاين.
+
+رابط الدخول:
+${loginLink}
+
+اسم المستخدم:
+${code}
+
+كلمة المرور:
+رقم الهاتف
+
+يرجى الاحتفاظ ببيانات الدخول ومتابعة المنصة لمعرفة مواعيد الدروس والتواجد الأونلاين.
+*لا تشارك بياناتك مع أحد ، حيث أن إدارة الأكاديمية لا تطلب من المتدربين الإفصاح عن بياناتهم الخاصة باسم المستخدم والباسورد ، فى أى حال من الأحوال *
+تم الارسال بواسطة،
+AWC Academy`;
+            
+            await safeDb.collection('trainees').doc(id).update({status:'مفعل'});
+            openWhatsApp(formatPhone(c, p), msg);
+            showNotification('تم التفعيل بنجاح', 'success', 'نجاح');
+            handleAttendanceSearch();
+        }
         function handleCertificateSearch() { const v = document.getElementById('certificate-search-input').value.toLowerCase(); const s = trainees.find(t=>t.phone==v || (t.code&&t.code.toLowerCase()==v)); if(s) { if(s.payment?.status==='مدفوع بالكامل') { document.getElementById('certificate-preview-area').classList.remove('hidden'); setText('cert-student-name', s.name); setText('cert-course-name', s.service); setText('cert-code', s.code); setText('cert-date', new Date().toLocaleDateString('ar-EG')); } else alert('يجب سداد الرسوم أولاً'); } }
         function switchLectureTab(t) {
             if (t === 'add') {
@@ -1166,19 +1440,72 @@
             activeBtn.className = "px-4 py-2 text-blue-600 border-b-2 border-blue-600 font-semibold";
             document.getElementById('lecture-tab-add').classList.add('hidden');
         }
-        async function handleAddInstructor(e) { e.preventDefault(); await safeDb.collection('instructors').add({name:document.getElementById('inst-name').value, spec:document.getElementById('inst-spec').value, email:document.getElementById('inst-email').value}); showNotification('تم','success'); e.target.reset(); }
+        async function handleAddInstructor(e) {
+            e.preventDefault();
+            const name = document.getElementById('inst-name').value;
+            const spec = document.getElementById('inst-spec').value;
+            const email = document.getElementById('inst-email').value;
+            const password = document.getElementById('inst-password').value;
+
+            if (currentUserRole !== 'admin') {
+                showNotification('ليس لديك الصلاحية لإضافة مدربين.', 'error');
+                return;
+            }
+
+            try {
+                const tempAppName = 'instructor-creation-app-' + Date.now();
+                const tempApp = firebase.initializeApp(firebaseConfig, tempAppName);
+                const tempAuth = tempApp.auth();
+                const userCredential = await tempAuth.createUserWithEmailAndPassword(email, password);
+                const newInstructorUser = userCredential.user;
+
+                await db.collection('system_users').doc(newInstructorUser.uid).set({ 
+                    email: newInstructorUser.email, role: 'instructor', createdAt: new Date().toISOString() 
+                });
+
+                await safeDb.collection('instructors').add({ name, spec, email, uid: newInstructorUser.uid });
+
+                await tempAuth.signOut();
+                await tempApp.delete();
+                showNotification('تم إنشاء حساب المدرب بنجاح.', 'success');
+                e.target.reset();
+            } catch (error) {
+                console.error("Error creating new instructor:", error);
+                showNotification(`خطأ في إنشاء المدرب: ${error.message}`, 'error');
+            }
+        }
         async function handleAddCourse(e) { e.preventDefault(); const iId=document.getElementById('course-instructor').value; const iName=instructors.find(i=>i.id==iId)?.name; await safeDb.collection('courses').add({name:document.getElementById('course-name').value, price:document.getElementById('course-price').value, instructorId:iId, instructorName:iName}); showNotification('تم','success'); e.target.reset(); }
         async function handleAddLecture(e) {
             e.preventDefault();
             const cId = document.getElementById('lec-course').value;
             const cName = courses.find(c => c.id == cId)?.name;
             const notify = document.getElementById('lec-notify').checked;
-            await safeDb.collection('lectures').add({
+
+            const lectureData = {
                 title: document.getElementById('lec-title').value, courseName: cName,
                 date: document.getElementById('lec-date').value, time: document.getElementById('lec-time').value,
-                link: document.getElementById('lec-link').value, status: 'upcoming',
+                link: document.getElementById('lec-link').value, status: 'upcoming', recordingUrl: null,
                 notify: notify, notificationSent: false
-            });
+            };
+
+            await safeDb.collection('lectures').add(lectureData);
+
+            // Automatic notification for new lecture
+            const activeStudentsInCourse = trainees.filter(t => t.service === cName && t.status === 'مفعل');
+            if (activeStudentsInCourse.length > 0) {
+                const doSend = confirm(`تمت إضافة المحاضرة بنجاح.\n\nهل تريد إرسال إشعار فوري للطلاب المسجلين في هذا الكورس؟ (العدد: ${activeStudentsInCourse.length})`);
+                if (doSend) {
+                    const message = `📢 *محاضرة جديدة* 📢\n\nتمت إضافة محاضرة جديدة لكورس "${cName}".\n\n*المحاضرة:* ${lectureData.title}\n*التاريخ:* ${lectureData.date}\n*الوقت:* ${lectureData.time}\n\nيمكنك متابعة التفاصيل من خلال بوابة الطالب.\n\nبالتوفيق!`;
+                    activeStudentsInCourse.forEach((student, index) => {
+                        setTimeout(() => {
+                            const phone = formatPhone(student.country, student.whatsapp || student.phone);
+                            openWhatsApp(phone, message);
+                        }, index * 500);
+                    });
+                    showNotification(`جاري إرسال ${activeStudentsInCourse.length} إشعار...`, 'info');
+                }
+            }
+
             showNotification('تمت إضافة المحاضرة بنجاح', 'success');
             e.target.reset();
             switchLectureTab('upcoming');
@@ -1216,6 +1543,104 @@
                 submitButton.innerHTML = '<i class="fas fa-upload"></i> رفع وتعيين الشهادة';
             }
         }
+        async function handleRecordingUpload(event, lectureId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const progressEl = document.getElementById(`upload-progress-${lectureId}`);
+            const labelEl = event.target.parentElement;
+
+            if (!progressEl || !labelEl) return;
+
+            labelEl.style.display = 'none'; // Hide button
+            progressEl.textContent = 'جاري الرفع... 0%';
+
+            try {
+                const filePath = `recordings/${lectureId}/${file.name}`;
+                const storageRef = storage.ref(filePath);
+                const uploadTask = storageRef.put(file);
+
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressEl.textContent = `جاري الرفع... ${Math.round(progress)}%`;
+                    }, 
+                    (error) => {
+                        console.error("Upload failed:", error);
+                        showNotification('فشل رفع التسجيل.', 'error');
+                        labelEl.style.display = 'inline-block'; // Show button again
+                        progressEl.textContent = '';
+                    }, 
+                    async () => {
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        await safeDb.collection('lectures').doc(lectureId).update({ recordingUrl: downloadURL });
+                        progressEl.textContent = 'تم الرفع بنجاح!';
+                    }
+                );
+            } catch (error) {
+                console.error("Error uploading recording:", error);
+                showNotification('حدث خطأ أثناء رفع التسجيل.', 'error');
+            }
+        }
+        function openEvaluationModal(traineeId) {
+            const trainee = trainees.find(t => t.id === traineeId);
+            if (!trainee) return;
+            document.getElementById('eval-trainee-id').value = traineeId;
+            setText('eval-student-name', trainee.name);
+            document.getElementById('evaluation-modal').classList.remove('hidden');
+        }
+
+        function closeEvaluationModal() {
+            document.getElementById('evaluation-modal').classList.add('hidden');
+            document.getElementById('evaluation-form').reset();
+        }
+
+        async function handleStudentEvaluation(e) {
+            e.preventDefault();
+            const traineeId = document.getElementById('eval-trainee-id').value;
+            const rating = document.getElementById('eval-rating').value;
+            const comment = document.getElementById('eval-comment').value;
+
+            if (!traineeId || !rating || !currentInstructorProfile) {
+                showNotification('بيانات غير مكتملة أو أنك لست مدرباً.', 'error');
+                return;
+            }
+
+            const trainee = trainees.find(t => t.id === traineeId);
+            if (!trainee) return;
+
+            const evaluationData = {
+                instructorId: currentInstructorProfile.id,
+                instructorName: currentInstructorProfile.name,
+                courseName: trainee.service,
+                rating: parseInt(rating),
+                comment: comment,
+                date: new Date().toISOString()
+            };
+
+            try {
+                await safeDb.collection('trainees').doc(traineeId).update({
+                    evaluations: firebase.firestore.FieldValue.arrayUnion(evaluationData)
+                });
+                showNotification('تم حفظ التقييم بنجاح.', 'success');
+                closeEvaluationModal();
+            } catch (error) {
+                console.error("Error saving evaluation:", error);
+                showNotification('حدث خطأ أثناء حفظ التقييم. قد تحتاج لإضافة حقل التقييمات أولاً.', 'error');
+            }
+        }
+
+        function updateEvaluationsUI() {
+            const tableBody = document.getElementById('evaluations-table-body');
+            if (!tableBody) return;
+            let allEvaluations = [];
+            trainees.forEach(t => { if (t.evaluations && Array.isArray(t.evaluations)) { t.evaluations.forEach(ev => allEvaluations.push({ studentName: t.name, ...ev })); } });
+            allEvaluations.sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (allEvaluations.length === 0) { tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-gray-400">لا توجد تقييمات حالياً.</td></tr>`; return; }
+            tableBody.innerHTML = allEvaluations.map(eval => `
+                <tr class="border-b hover:bg-gray-50"><td class="p-3 font-bold">${eval.studentName}</td><td class="p-3 text-sm">${eval.courseName}</td><td class="p-3 text-sm">${eval.instructorName}</td><td class="p-3 text-center font-bold text-lg ${eval.rating >= 7 ? 'text-green-600' : (eval.rating >= 4 ? 'text-yellow-600' : 'text-red-600')}">${eval.rating}/10</td><td class="p-3 text-sm text-gray-600">${eval.comment || 'لا يوجد'}</td><td class="p-3 text-xs text-gray-500">${new Date(eval.date).toLocaleDateString('ar-EG')}</td></tr>
+            `).join('');
+        }
         function showNotification(m,t,title='تنبيه') { setText('notification-title', title); setText('notification-message', m); document.getElementById('notification-modal').classList.remove('hidden'); }
         function closeNotification() { document.getElementById('notification-modal').classList.add('hidden'); }
         async function handleAddNewUser(e) {
@@ -1228,6 +1653,11 @@
             const email = document.getElementById('new-user-email').value;
             const password = document.getElementById('new-user-password').value;
             const role = document.getElementById('new-user-role').value;
+
+            if (role === 'instructor') {
+                showNotification('لإضافة مدرب، يرجى استخدام صفحة "إدارة المدربين" لإنشاء حساب متكامل.', 'error');
+                return;
+            }
 
             try {
                 const tempAppName = 'user-creation-app-' + Date.now();
