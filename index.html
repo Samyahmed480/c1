@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
     <!-- Jitsi Meet API -->
     <script src='https://meet.jit.si/external_api.js'></script>
     
@@ -190,16 +191,22 @@
             <!-- 4. Certificates -->
             <div id="view-certificates" class="view-section fade-in hidden">
                 <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <h2 class="text-xl font-bold mb-4 text-primary">إصدار الشهادات</h2>
-                    <input type="text" id="certificate-search-input" onkeyup="handleCertificateSearch()" placeholder="بحث..." class="w-full p-3 border rounded mb-4 no-print">
-                    <div id="certificate-preview-area" class="hidden">
-                        <div id="certificate-print-area" class="certificate-bg p-10 text-center relative text-gray-800 shadow-lg mx-auto max-w-4xl h-[600px] flex flex-col justify-center border-4 border-blue-900">
-                            <h1 class="text-5xl font-bold text-primary mb-8">شهادة إتمام</h1>
-                            <h2 id="cert-student-name" class="text-4xl font-bold text-accent mb-4">اسم الطالب</h2>
-                            <h3 id="cert-course-name" class="text-3xl font-bold text-gray-700">الكورس</h3>
-                            <p class="mt-8 text-sm text-gray-500">Code: <span id="cert-code"></span> | Date: <span id="cert-date"></span></p>
+                    <h2 class="text-xl font-bold mb-4 text-primary">إدارة الشهادات</h2>
+                    <form onsubmit="handleCertificateUpload(event)" class="space-y-4 bg-gray-50 p-4 rounded-lg border">
+                        <div>
+                            <label class="block text-sm font-bold mb-2 text-gray-700">اختر الطالب</label>
+                            <select id="cert-trainee-select" class="w-full p-3 border rounded-lg bg-white" required>
+                                <option value="">-- الرجاء الاختيار --</option>
+                            </select>
                         </div>
-                    </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2 text-gray-700">ارفع ملف الشهادة (PDF أو صورة)</label>
+                            <input type="file" id="cert-file-upload" accept="image/*,application/pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border rounded-lg p-2 bg-white" required>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition shadow-md">
+                            <i class="fas fa-upload"></i> رفع وتعيين الشهادة
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -453,8 +460,8 @@
                         </div>
                         <!-- Certificate -->
                         <div id="trainee-cert-section" class="hidden bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center border-green-100 bg-green-50">
-                            <div><h3 class="font-bold text-green-800">شهادة التخرج</h3><p class="text-sm text-green-600">مبارك! لقد أتممت الكورس بنجاح.</p></div>
-                            <button onclick="window.print()" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700">تحميل الشهادة</button>
+                            <div><h3 class="font-bold text-green-800">شهادة التخرج</h3><p class="text-sm text-green-600">مبارك! شهادتك جاهزة للتحميل.</p></div>
+                            <button class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700"><i class="fas fa-download mr-2"></i> تحميل الشهادة</button>
                         </div>
                     </div>
                     <div id="trainee-no-course-selected" class="flex items-center justify-center h-full bg-white rounded-xl border min-h-[400px]">
@@ -499,7 +506,7 @@
     <script>
         // === FIREBASE CONFIG ===
         let firebaseConfig; if(typeof __firebase_config !== 'undefined') firebaseConfig = JSON.parse(__firebase_config); else firebaseConfig = { apiKey: "AIzaSyAj6ykD72lDT7_5IeXRDR2paHOAqfQTdxo", authDomain: "awc-system.firebaseapp.com", projectId: "awc-system", storageBucket: "awc-system.appspot.com", messagingSenderId: "739243681978", appId: "1:739243681978:web:a1c77f354ae6424f70ba83", measurementId: "G-1PHE48ZPDK" };
-        firebase.initializeApp(firebaseConfig); const db = firebase.firestore(); const auth = firebase.auth(); const appId = typeof __app_id !== 'undefined' ? __app_id : 'awc-default';
+        firebase.initializeApp(firebaseConfig); const db = firebase.firestore(); const auth = firebase.auth(); const storage = firebase.storage(); const appId = typeof __app_id !== 'undefined' ? __app_id : 'awc-default';
         const safeDb = { collection: (n) => typeof __app_id !== 'undefined' ? db.collection('artifacts').doc(appId).collection('public').doc('data').collection(n) : db.collection(n) };
 
         // === HELPERS ===
@@ -859,12 +866,15 @@
             const emptyRow = `<tr><td colspan="5" class="text-center p-6 text-gray-400">لا يوجد محاضرات مجدولة لهذا الكورس.</td></tr>`;
             setHTML('trainee-schedule-tbody', myLecs.length > 0 ? scheduleRows : emptyRow);
             
-            const cert = document.getElementById('trainee-cert-section');
-            if(cert) {
-                if(s.payment?.status==='مدفوع بالكامل' || pct>=100) {
-                    cert.classList.remove('hidden');
-                    setText('cert-student-name', s.name); setText('cert-course-name', s.service); setText('cert-code', s.code); setText('cert-date', new Date().toLocaleDateString());
-                } else cert.classList.add('hidden');
+            const certSection = document.getElementById('trainee-cert-section');
+            if (certSection) {
+                if (s.certificateUrl) {
+                    certSection.classList.remove('hidden');
+                    const downloadButton = certSection.querySelector('button');
+                    downloadButton.onclick = () => window.open(s.certificateUrl, '_blank');
+                } else {
+                    certSection.classList.add('hidden');
+                }
             }
         }
 
@@ -918,6 +928,15 @@
                     <div><p class="text-gray-500">المصدر</p><p class="font-bold">${trainee.source}</p></div>
                     <div><p class="text-gray-500">تاريخ التسجيل</p><p class="font-bold">${new Date(trainee.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
                     <div><p class="text-gray-500">الحالة</p><p class="font-bold px-2 py-1 rounded inline-block ${trainee.status==='مفعل'?'bg-green-100 text-green-800':'bg-gray-100 text-gray-800'}">${trainee.status}</p></div>
+                    
+                    ${trainee.certificateUrl ? `
+                        <div class="sm:col-span-2 mt-2">
+                            <p class="text-gray-500">الشهادة</p>
+                            <a href="${trainee.certificateUrl}" target="_blank" class="inline-block bg-green-100 text-green-800 font-bold py-2 px-4 rounded-lg hover:bg-green-200 transition">
+                                <i class="fas fa-download mr-2"></i> عرض/تحميل الشهادة
+                            </a>
+                        </div>
+                    ` : ''}
                     
                     ${serviceDetailsHtml}
 
@@ -1041,8 +1060,13 @@
 
         // === UI UPDATERS ===
         function updateInstructorsUI() { const h = instructors.map(i=>`<tr class="border-b"><td class="p-2">${i.name}</td><td class="p-2">${i.spec}</td><td class="p-2"><button onclick="deleteItem('instructors','${i.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('instructors-table-body', h); const opts = '<option value="">اختر</option>' + instructors.map(i=>`<option value="${i.id}">${i.name}</option>`).join(''); setHTML('course-instructor', opts); setHTML('lec-instructor-select', opts); }
-        function updateCoursesUI() { const h = courses.map(c=>`<tr class="border-b"><td class="p-2">${c.name}</td><td class="p-2">${c.price}</td><td class="p-2">${c.instructorName}</td><td class="p-2"><button onclick="deleteItem('courses','${c.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('courses-table-body', h); const opts = '<option value="">اختر</option>' + courses.map(c=>`<option value="${c.name}" data-price="${c.price}">${c.name}</option>`).join(''); const opts2 = '<option value="">اختر</option>' + courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); setHTML('reg-service', opts); setHTML('lec-course', opts2); }
-        function updateTraineesUI() { setText('stat-total-students', trainees.length); setText('stat-consulting', trainees.filter(t=>t.serviceType==='consulting').length); setHTML('trainees-table-body', trainees.slice(0,15).map(t=>`<tr class="border-b"><td class="p-2">${t.name}</td><td class="p-2">${t.service}</td><td class="p-2">${t.status}</td></tr>`).join('')); }
+        function updateCoursesUI() { const h = courses.map(c=>`<tr class="border-b"><td class="p-2">${c.name}</td><td class="p-2">${c.price}</td><td class="p-2">${c.instructorName}</td><td class="p-2"><button onclick="deleteItem('courses','${c.id}')" class="text-red-500">X</button></td></tr>`).join(''); setHTML('courses-table-body', h); const opts = '<option value="">-- اختر --</option>' + courses.map(c=>`<option value="${c.name}" data-price="${c.price}">${c.name}</option>`).join(''); const opts2 = '<option value="">-- اختر --</option>' + courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); setHTML('reg-service', opts); setHTML('lec-course', opts2); }
+        function updateTraineesUI() { 
+            setText('stat-total-students', trainees.length); 
+            setText('stat-consulting', trainees.filter(t=>t.serviceType==='consulting').length); 
+            setHTML('trainees-table-body', trainees.slice(0,15).map(t=>`<tr class="border-b"><td class="p-2">${t.name}</td><td class="p-2">${t.service}</td><td class="p-2">${t.status}</td></tr>`).join('')); 
+            updateCertificateTraineeSelect();
+        }
         function updateTraineesManagementUI() { const term = document.getElementById('trainee-management-search')?.value.toLowerCase()||''; const res = trainees.filter(t => t.name.toLowerCase().includes(term)||(t.code&&t.code.toLowerCase().includes(term))); setHTML('trainees-management-table-body', res.map(t=>`<tr class="border-b hover:bg-gray-50"><td class="p-3 font-mono text-xs">${t.code}</td><td class="p-3 font-bold">${t.name}</td><td class="p-3" dir="ltr">${t.phone}</td><td class="p-3">${t.service}</td><td class="p-3"><span class="px-2 py-1 text-xs rounded ${t.status==='مفعل'?'bg-green-100 text-green-800':'bg-gray-100 text-gray-800'}">${t.status}</span></td><td class="p-3 flex gap-3"><button onclick="showTraineeDetails('${t.id}')" class="text-blue-600 hover:text-blue-800" title="عرض التفاصيل"><i class="fas fa-eye"></i></button><button onclick="deleteItem('trainees','${t.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fas fa-trash"></i></button></td></tr>`).join('')); }
         function updateUsersUI() {
             const currentUser = auth.currentUser;
@@ -1127,7 +1151,6 @@
         async function addPayment(id) { const v = parseFloat(document.getElementById('pay-'+id).value); if(!v) return; const t = trainees.find(x=>x.id==id); const np = (t.payment.paid||0)+v; await safeDb.collection('trainees').doc(id).update({'payment.paid':np, 'payment.status': np>=t.payment.total?'مدفوع بالكامل':'جزئي'}); showNotification('تم تحديث المدفوعات','success', 'نجاح'); }
         async function activateT(id, n, p, c) { await safeDb.collection('trainees').doc(id).update({status:'مفعل'}); openWhatsApp(formatPhone(c,p), `مرحباً ${n}\nتم تفعيل حسابك في النظام.`); showNotification('تم التفعيل','success', 'نجاح'); handleAttendanceSearch(); }
         function handleCertificateSearch() { const v = document.getElementById('certificate-search-input').value.toLowerCase(); const s = trainees.find(t=>t.phone==v || (t.code&&t.code.toLowerCase()==v)); if(s) { if(s.payment?.status==='مدفوع بالكامل') { document.getElementById('certificate-preview-area').classList.remove('hidden'); setText('cert-student-name', s.name); setText('cert-course-name', s.service); setText('cert-code', s.code); setText('cert-date', new Date().toLocaleDateString('ar-EG')); } else alert('يجب سداد الرسوم أولاً'); } }
-        function sendCertificateWhatsApp() { showNotification('تم الإرسال (تجريبي)','success'); }
         function switchLectureTab(t) {
             if (t === 'add') {
                 document.getElementById('lecture-tab-add').classList.toggle('hidden');
@@ -1161,6 +1184,38 @@
             switchLectureTab('upcoming');
         }
         async function deleteItem(col, id) { if(confirm('حذف؟')) await safeDb.collection(col).doc(id).delete(); }
+        async function handleCertificateUpload(e) {
+            e.preventDefault();
+            const traineeId = document.getElementById('cert-trainee-select').value;
+            const file = document.getElementById('cert-file-upload').files[0];
+
+            if (!traineeId || !file) {
+                showNotification('الرجاء اختيار طالب ورفع ملف الشهادة.', 'error');
+                return;
+            }
+
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
+
+            try {
+                const filePath = `certificates/${traineeId}/${file.name}`;
+                const storageRef = storage.ref(filePath);
+                const uploadTask = await storageRef.put(file);
+                const downloadURL = await uploadTask.ref.getDownloadURL();
+
+                await safeDb.collection('trainees').doc(traineeId).update({ certificateUrl: downloadURL });
+
+                showNotification('تم رفع الشهادة وتعيينها للطالب بنجاح.', 'success');
+                e.target.reset();
+            } catch (error) {
+                console.error("Error uploading certificate:", error);
+                showNotification('حدث خطأ أثناء رفع الشهادة.', 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-upload"></i> رفع وتعيين الشهادة';
+            }
+        }
         function showNotification(m,t,title='تنبيه') { setText('notification-title', title); setText('notification-message', m); document.getElementById('notification-modal').classList.remove('hidden'); }
         function closeNotification() { document.getElementById('notification-modal').classList.add('hidden'); }
         async function handleAddNewUser(e) {
@@ -1196,6 +1251,15 @@
                 try { await db.collection('system_users').doc(uid).delete(); showNotification('تم حذف صلاحيات المستخدم.', 'success'); } 
                 catch (error) { showNotification('حدث خطأ.', 'error'); }
             }
+        }
+        function updateCertificateTraineeSelect() {
+            const selectEl = document.getElementById('cert-trainee-select');
+            if (!selectEl) return;
+            const options = trainees
+                .filter(t => t.payment?.status === 'مدفوع بالكامل')
+                .map(t => `<option value="${t.id}">${t.name} - ${t.service} (${t.code})</option>`)
+                .join('');
+            selectEl.innerHTML = `<option value="">-- اختر طالب مكتمل السداد --</option>${options}`;
         }
     </script>
 </body>
